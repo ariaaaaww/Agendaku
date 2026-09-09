@@ -1,13 +1,15 @@
 <!-- FIXED VERTICAL SIDEBAR / HEADER -->
 <header
-    class="app-header fixed top-0 left-0 bottom-0 w-full max-lg:h-[72px] lg:w-[280px] bg-bg-sidebar max-lg:border-b-2 lg:border-r-2 border-text-dark lg:border-border-custom flex flex-row lg:flex-col justify-between items-center lg:items-stretch p-3.5 lg:p-8 z-[1000] lg:z-[100] transition-all duration-300 shadow-sm"
+    class="app-header fixed top-0 left-0 bottom-0 w-full max-lg:h-[72px] lg:w-[280px] bg-bg-sidebar max-lg:border-b-2 lg:border-r-2 
+    border-text-dark lg:border-border-custom flex flex-row lg:flex-col justify-between items-center lg:items-stretch p-3.5 lg:py-8 lg:px-8 z-[1000] lg:z-[100] 
+    transition-all duration-300 shadow-sm"
     id="app-header">
 
     <div class="flex items-center justify-between w-full">
         <div class="brand flex items-center gap-3.5 lg:pb-6 lg:border-b-2 lg:border-dashed lg:border-border-custom group cursor-pointer"
-            onclick="window.location.href='/students'">
+            onclick="goToRoleHome()">
             <div
-                class="brand-logo w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-primary-orange to-accent-yellow rounded-xl grid place-items-center text-white font-extrabold text-3xl lg:text-2xl shadow-[0_6px_16px_rgba(255,90,54,0.25)] -rotate-3 group-hover:rotate-3 group-hover:scale-105 transition-transform duration-300">
+                class="brand-logo w-10 h-10 lg:w-12 lg:h-12 bg-primary-orange rounded-xl grid place-items-center text-white font-extrabold text-3xl lg:text-2xl shadow-[0_6px_16px_rgba(255,90,54,0.25)] group-hover:scale-105 transition-transform duration-300">
                 A</div>
             <div class="brand-text">
                 <h1 class="text-lg lg:text-xl font-extrabold tracking-tight leading-tight text-text-dark">Agendaku</h1>
@@ -28,19 +30,26 @@
         class="nav-tabs flex flex-col gap-2.5 mt-6 w-[93%] max-lg:fixed max-lg:top-[72px] max-lg:-left-full max-lg:w-[280px] max-lg:h-[calc(100vh-72px)] max-lg:bg-white max-lg:border-r-2 max-lg:border-text-dark max-lg:p-5 max-lg:z-[999] max-lg:mt-0 max-lg:shadow-2xl transition-[left] duration-300">
         <button onclick="switchTab('kalender')" id="tab-btn-kalender"
             class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover active">
-            <span>📅</span> Kalender
+            <span class="icon-[akar-icons--calendar]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                    <g class="nrj6pi">
+                        <rect class="rn0ebg" />
+                        <path class="qug2mi" />
+                    </g>
+                </svg>
+            </span> Kalender
         </button>
         <button onclick="switchTab('tugas')" id="tab-btn-tugas"
             class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
-            <span>📋</span> To-Do List
+            <span class="icon-[ci--list-check]"></span> To-Do List
         </button>
         <button onclick="switchTab('acara')" id="tab-btn-acara"
             class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
-            <span>🎉</span> Acara Sekolah
+            <span class="icon-[hugeicons--ai-magic]"></span> Acara Sekolah
         </button>
         <button onclick="switchTab('tambah')" id="tab-btn-tambah"
             class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
-            <span>➕</span> Tambah Agenda
+            <span class="icon-[akar-icons--plus]"></span> Tambah Agenda
         </button>
         <button id="tab-btn-role"
             class="nav-tab-btn hidden flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover"></button>

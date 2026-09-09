@@ -36,8 +36,10 @@
                         'text-dark': '#1E2522',
                         'text-muted': '#6C7571',
                         'border-custom': '#E8E3D9',
-                        'cat-sekolah': '#3A86EF',
-                        'cat-sekolah-bg': '#EFF6FF',
+                        // 'cat-sekolah': '#3A86EF',
+                        'cat-sekolah': '#FF5E3A',
+                        // 'cat-sekolah-bg': '#EFF6FF',
+                        'cat-sekolah-bg': '#FFDFD8',
                         'cat-pribadi': '#10B981',
                         'cat-pribadi-bg': '#ECFDF5',
                         'cat-acara': '#8B5CF6',
@@ -58,8 +60,8 @@
             }
         }
     </script>
-
-    @vite(['resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- @vite(['resources/js/app.js']) --}}
     @stack('styles')
 </head>
 

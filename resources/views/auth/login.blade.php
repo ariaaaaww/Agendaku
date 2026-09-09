@@ -13,7 +13,7 @@
     <!-- Auth Header with Brand -->
     <div class="auth-header-bar flex items-center gap-7 mb-6 pb-4 border-b-2 border-dashed border-border-custom">
       <div class="brand flex items-center gap-3 border-none pb-0">
-        <div class="brand-logo w-9 h-9 bg-gradient-to-br from-primary-orange to-accent-yellow rounded-xl grid place-items-center text-white font-extrabold text-lg -rotate-3">A</div>
+        <div class="brand-logo w-10 h-10 bg-primary-orange rounded-xl grid place-items-center text-white font-extrabold text-lg ">A</div>
         <div class="brand-text">
           <h1 class="text-lg font-extrabold leading-tight text-text-dark">Agendaku</h1>
           <span class="text-[0.65rem] font-bold text-primary-orange uppercase tracking-wider block">Class&Life Sync</span>
