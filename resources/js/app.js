@@ -194,11 +194,11 @@ function updateNavHeader() {
                 roleBtn.classList.add("flex");
                 const roleRoutes = {
                     admin: {
-                        label: '<span class="icon-[ci--users]"></span> Panel Admin',
+                        label: '<span class="icon-[clarity--administrator-line]"></span> Panel Admin',
                         url: "/admin",
                     },
                     guru: {
-                        label: '<span class="icon-[ci--users]"></span> Panel Guru',
+                        label: '<span class="icon-[ci--users]"></span>  Panel Guru',
                         url: "/teachers",
                     },
                     osis: {
