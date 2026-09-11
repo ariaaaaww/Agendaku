@@ -92,7 +92,7 @@ let currentUser = JSON.parse(sessionStorage.getItem("currentUser")) || null;
 // Auto initialize currentUser based on active route if not logged in
 if (!currentUser) {
     const path = window.location.pathname;
-    if (path.includes("/teachers")) {
+    if (path.includes("/teacher")) {
         currentUser = defaultUsers[2]; // Guru
     } else if (path.includes("/admin")) {
         currentUser = defaultUsers[1]; // Admin
@@ -108,13 +108,13 @@ if (!currentUser) {
 
 function getRoleBasePath() {
     if (currentUser) {
-        if (currentUser.role === "guru") return "/teachers";
+        if (currentUser.role === "guru") return "/teacher";
         if (currentUser.role === "osis") return "/council";
         if (currentUser.role === "admin") return "/admin";
         return "/students";
     }
     const path = window.location.pathname;
-    if (path.includes("/teachers")) return "/teachers";
+    if (path.includes("/teacher")) return "/teacher";
     if (path.includes("/council")) return "/council";
     if (path.includes("/admin")) return "/admin";
     return "/students";
@@ -199,7 +199,7 @@ function updateNavHeader() {
                     },
                     guru: {
                         label: '<span class="icon-[ci--users]"></span>  Panel Guru',
-                        url: "/teachers",
+                        url: "/teacher",
                     },
                     osis: {
                         label: '<span class="icon-[ci--users]"></span> Panel OSIS',
@@ -303,7 +303,7 @@ function handleLogin(e) {
         if (currentUser.role === "admin") {
             window.location.href = "/admin";
         } else if (currentUser.role === "guru") {
-            window.location.href = "/teachers";
+            window.location.href = "/teacher";
         } else if (currentUser.role === "osis") {
             window.location.href = "/council";
         } else {
@@ -602,7 +602,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (tabParam) {
         switchTab(tabParam);
     } else if (
-        path.includes("/teachers") ||
+        path.includes("/teacher") ||
         path.includes("/council") ||
         path.includes("/admin")
     ) {
@@ -619,7 +619,7 @@ window.addEventListener("popstate", function () {
     if (tabParam) {
         switchTab(tabParam);
     } else if (
-        path.includes("/teachers") ||
+        path.includes("/teacher") ||
         path.includes("/council") ||
         path.includes("/admin")
     ) {

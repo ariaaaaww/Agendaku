@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-class TeachersController extends Controller
+class TeacherController extends Controller
 {
-    public function teachers()
+    public function teacher()
     {
         $title = 'Agendaku - Guru';
 
-        return view('teachers.index',
+        return view('teacher.index',
             [
                 'title' => $title,
             ]);

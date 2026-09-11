@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentCouncilController;
-use App\Http\Controllers\TeachersController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,10 +17,10 @@ Route::get('/register', [AuthController::class, 'register'])->name('register');
 
 Route::get('/account', [AuthController::class, 'account'])->name('account');
 
-Route::get('/students', [StudentController::class, 'student'])->name('index');
+Route::get('/students', [StudentController::class, 'student'])->name('students.index');
 
-Route::get('/teachers', [TeachersController::class, 'teachers'])->name('teachers');
+Route::get('/teacher', [TeacherController::class, 'teacher'])->name('teachers.index');
 
-Route::get('/admin', [AdminController::class, 'admin'])->name('admin');
+Route::get('/admin', [AdminController::class, 'admin'])->name('admin.index');
 
-Route::get('/council', [StudentCouncilController::class, 'council'])->name('council');
+Route::get('/council', [StudentCouncilController::class, 'council'])->name('council.index');
