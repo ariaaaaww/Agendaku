@@ -8,9 +8,11 @@ class TeacherController extends Controller
     {
         $title = 'Agendaku - Guru';
 
-        return view('teacher.index',
+        return view(
+            'teachers.index',
             [
                 'title' => $title,
-            ]);
+            ]
+        );
     }
 }
