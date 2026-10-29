@@ -24,3 +24,5 @@ Route::get('/teacher', [TeacherController::class, 'teacher'])->name('teachers.in
 Route::get('/admin', [AdminController::class, 'admin'])->name('admin.index');
 
 Route::get('/council', [StudentCouncilController::class, 'council'])->name('council.index');
+
+Route::post('/register', [AuthController::class, 'storeRegister'])->name('register.store');
