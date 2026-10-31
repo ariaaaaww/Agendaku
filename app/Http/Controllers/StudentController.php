@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\View\View;
+
 class StudentController extends Controller
 {
-    public function student()
+    public function student(): View
     {
-        $title = 'Agendaku - Siswa';
+        $commonData = $this->getCommonDashboardData();
 
-        return view('students.index',
-            [
-                'title' => $title,
-            ]);
+        return view('students.index', array_merge($commonData, [
+            'title' => 'Agendaku - Siswa',
+        ]));
     }
 }

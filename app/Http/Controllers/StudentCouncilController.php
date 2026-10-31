@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SchoolEvent;
+use Illuminate\View\View;
+
 class StudentCouncilController extends Controller
 {
-    public function council()
+    public function council(): View
     {
-        $title = 'Agendaku - OSIS';
+        $commonData = $this->getCommonDashboardData();
 
-        return view('council.index', [
-            'title' => $title,
-        ]);
+        $osisEvents = SchoolEvent::with('organizer')->latest()->get();
+
+        return view('council.index', array_merge($commonData, [
+            'title' => 'Agendaku - OSIS',
+            'osisEvents' => $osisEvents,
+        ]));
     }
 }

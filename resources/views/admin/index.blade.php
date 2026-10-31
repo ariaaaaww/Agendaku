@@ -13,17 +13,15 @@
             <div class="stats-grid grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-5 mb-8">
                 <div class="stat-card bg-bg-card border-2 border-text-dark rounded-2xl p-6 shadow-pop-5px">
                     <span class="text-xs text-text-muted font-extrabold uppercase tracking-wider">Total Pengguna</span>
-                    <h3 id="admin-stat-users" class="text-4xl font-extrabold mt-1.5 text-primary-orange tracking-tight">0</h3>
+                    <h3 id="admin-stat-users" class="text-4xl font-extrabold mt-1.5 text-primary-orange tracking-tight">{{ $totalUsers ?? 0 }}</h3>
                 </div>
                 <div class="stat-card bg-bg-card border-2 border-text-dark rounded-2xl p-6 shadow-pop-5px">
                     <span class="text-xs text-text-muted font-extrabold uppercase tracking-wider">Total Tugas Selesai</span>
-                    <h3 id="admin-stat-completed" class="text-4xl font-extrabold mt-1.5 text-cat-pribadi tracking-tight">0
-                    </h3>
+                    <h3 id="admin-stat-completed" class="text-4xl font-extrabold mt-1.5 text-cat-pribadi tracking-tight">{{ $totalCompletedTasks ?? 0 }}</h3>
                 </div>
                 <div class="stat-card bg-bg-card border-2 border-text-dark rounded-2xl p-6 shadow-pop-5px">
                     <span class="text-xs text-text-muted font-extrabold uppercase tracking-wider">Total Tugas Pending</span>
-                    <h3 id="admin-stat-pending" class="text-4xl font-extrabold mt-1.5 text-prio-tinggi tracking-tight">0
-                    </h3>
+                    <h3 id="admin-stat-pending" class="text-4xl font-extrabold mt-1.5 text-prio-tinggi tracking-tight">{{ $totalPendingTasks ?? 0 }}</h3>
                 </div>
             </div>
 
@@ -42,7 +40,22 @@
                                 <th class="p-4.5 border-b border-border-custom">Total Tugas</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-user-table-body" class="[&_tr:hover_td]:bg-primary-light"></tbody>
+                        <tbody id="admin-user-table-body" class="[&_tr:hover_td]:bg-primary-light">
+                            @if (isset($studentProgress) && $studentProgress->count() > 0)
+                                @foreach ($studentProgress as $siswa)
+                                    <tr class="border-b border-border-custom">
+                                        <td class="p-4.5 font-extrabold">{{ $siswa->name }} ({{ '@'.$siswa->username }})</td>
+                                        <td class="p-4.5 font-extrabold text-cat-pribadi">{{ $siswa->completed_count }}</td>
+                                        <td class="p-4.5 font-extrabold text-prio-tinggi">{{ $siswa->pending_count }}</td>
+                                        <td class="p-4.5 font-bold"><strong>{{ $siswa->total_count }}</strong></td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="4" class="p-6 text-center text-text-muted font-bold">Belum ada data siswa.</td>
+                                </tr>
+                            @endif
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -61,7 +74,21 @@
                                 <th class="p-4.5 border-b border-border-custom">Penyelenggara</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-events-table-body" class="[&_tr:hover_td]:bg-primary-light"></tbody>
+                        <tbody id="admin-events-table-body" class="[&_tr:hover_td]:bg-primary-light">
+                            @if (isset($allEvents) && $allEvents->count() > 0)
+                                @foreach ($allEvents as $ev)
+                                    <tr class="border-b border-border-custom">
+                                        <td class="p-4.5 font-extrabold">{{ $ev->title }}</td>
+                                        <td class="p-4.5">{{ \Carbon\Carbon::parse($ev->event_date)->format('Y-m-d') }}</td>
+                                        <td class="p-4.5">{{ $ev->organizer->name ?? 'OSIS' }}</td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="3" class="p-6 text-center text-text-muted font-bold">Belum ada acara sekolah/OSIS.</td>
+                                </tr>
+                            @endif
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -87,7 +114,43 @@
                                 <th class="p-4.5 border-b border-border-custom">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-users-manage-table" class="[&_tr:hover_td]:bg-primary-light"></tbody>
+                        <tbody id="admin-users-manage-table" class="[&_tr:hover_td]:bg-primary-light">
+                            @php
+                                $roleBadges = [
+                                    'siswa' => 'bg-primary-light text-primary-orange border-primary-orange/30',
+                                    'admin' => 'bg-amber-100 text-amber-700 border-amber-500/30',
+                                    'guru' => 'bg-green-100 text-green-700 border-green-600/30',
+                                    'osis' => 'bg-purple-100 text-purple-700 border-purple-600/30',
+                                ];
+                            @endphp
+                            @if (isset($allUsers) && $allUsers->count() > 0)
+                                @foreach ($allUsers as $u)
+                                    <tr class="border-b border-border-custom">
+                                        <td class="p-4.5 font-extrabold text-text-dark">{{ $u->name }}</td>
+                                        <td class="p-4.5 font-semibold text-text-muted">{{ '@'.$u->username }}</td>
+                                        <td class="p-4.5">
+                                            <span class="inline-block px-2.5 py-0.5 rounded-full text-[0.7rem] font-extrabold uppercase tracking-wider border {{ $roleBadges[$u->role] ?? $roleBadges['siswa'] }}">
+                                                {{ $u->role }}
+                                            </span>
+                                        </td>
+                                        <td class="p-4.5 flex items-center gap-2">
+                                            <button
+                                                class="bg-amber-100 text-amber-800 border-2 border-amber-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-amber-400 hover:text-text-dark hover:border-text-dark hover:shadow-pop-sm"
+                                                onclick="openEditUserModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ addslashes($u->username) }}', '{{ $u->role }}')">
+                                                Ubah
+                                            </button>
+                                            @if (auth()->id() !== $u->id)
+                                                <button
+                                                    class="bg-red-100 text-red-600 border-2 border-red-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-text-dark hover:shadow-pop-sm"
+                                                    onclick="deleteUserAccount({{ $u->id }})">
+                                                    Hapus
+                                                </button>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -215,95 +278,12 @@
 
 @push('scripts')
     <script>
-        function renderAdminData() {
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        function openAddUserModal() {
+            document.getElementById('modal-add-user').classList.remove('hidden');
+        }
 
-            const siswas = users.filter(u => u.role === 'siswa');
-            const completedTasks = tasks.filter(t => t.completed).length;
-            const pendingTasks = tasks.filter(t => !t.completed && t.category !== 'acara').length;
-
-            const uStat = document.getElementById('admin-stat-users');
-            const cStat = document.getElementById('admin-stat-completed');
-            const pStat = document.getElementById('admin-stat-pending');
-
-            if (uStat) uStat.innerText = users.length;
-            if (cStat) cStat.innerText = completedTasks;
-            if (pStat) pStat.innerText = pendingTasks;
-
-            // 1. Progres Siswa
-            const userTable = document.getElementById('admin-user-table-body');
-            if (userTable) {
-                userTable.innerHTML = '';
-                siswas.forEach(siswa => {
-                    const uTasks = tasks.filter(t => t.userId === siswa.id);
-                    const uDone = uTasks.filter(t => t.completed).length;
-                    const uPending = uTasks.filter(t => !t.completed).length;
-
-                    userTable.innerHTML += `
-                        <tr class="border-b border-border-custom">
-                            <td class="p-4.5 font-extrabold">${siswa.fullname} (@${siswa.username})</td>
-                            <td class="p-4.5 font-extrabold text-cat-pribadi">${uDone}</td>
-                            <td class="p-4.5 font-extrabold text-prio-tinggi">${uPending}</td>
-                            <td class="p-4.5 font-bold"><strong>${uTasks.length}</strong></td>
-                        </tr>
-                    `;
-                });
-            }
-
-            // 2. Daftar Acara OSIS & Sekolah
-            const eventsTable = document.getElementById('admin-events-table-body');
-            if (eventsTable) {
-                eventsTable.innerHTML = '';
-                const events = tasks.filter(t => t.category === 'acara');
-                events.forEach(ev => {
-                    eventsTable.innerHTML += `
-                        <tr class="border-b border-border-custom">
-                            <td class="p-4.5 font-extrabold">${ev.title}</td>
-                            <td class="p-4.5">${ev.deadline}</td>
-                            <td class="p-4.5">${ev.createdBy || 'OSIS'}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            // 3. Pengaturan Akun Pengguna
-            const manageTable = document.getElementById('admin-users-manage-table');
-            if (manageTable) {
-                manageTable.innerHTML = '';
-                const roleBadges = {
-                    siswa: 'bg-primary-light text-primary-orange border-primary-orange/30',
-                    admin: 'bg-amber-100 text-amber-700 border-amber-500/30',
-                    guru: 'bg-green-100 text-green-700 border-green-600/30',
-                    osis: 'bg-purple-100 text-purple-700 border-purple-600/30',
-                };
-
-                users.forEach(u => {
-                    manageTable.innerHTML += `
-                        <tr class="border-b border-border-custom">
-                            <td class="p-4.5 font-extrabold text-text-dark">${u.fullname}</td>
-                            <td class="p-4.5 font-semibold text-text-muted">@${u.username}</td>
-                            <td class="p-4.5">
-                                <span class="inline-block px-2.5 py-0.5 rounded-full text-[0.7rem] font-extrabold uppercase tracking-wider border ${roleBadges[u.role] || roleBadges.siswa}">
-                                    ${u.role}
-                                </span>
-                            </td>
-                            <td class="p-4.5 flex items-center gap-2">
-                                <button 
-                                    class="bg-amber-100 text-amber-800 border-2 border-amber-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-amber-400 hover:text-text-dark hover:border-text-dark hover:shadow-pop-sm"
-                                    onclick="openEditUserModal(${u.id})">
-                                    Ubah
-                                </button>
-                                <button 
-                                    class="bg-red-100 text-red-600 border-2 border-red-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-text-dark hover:shadow-pop-sm"
-                                    onclick="deleteUserAccount(${u.id})">
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
+        function closeAddUserModal() {
+            document.getElementById('modal-add-user').classList.add('hidden');
         }
 
         /* --- HANDLER TAMBAH AKUN --- */
@@ -315,45 +295,42 @@
             document.getElementById('modal-add-user').classList.add('hidden');
         }
 
-        function handleAdminAddUser(e) {
+        async function handleAdminAddUser(e) {
             e.preventDefault();
             const fullname = document.getElementById('add-user-fullname').value.trim();
             const username = document.getElementById('add-user-username').value.trim();
             const role = document.getElementById('add-user-role').value;
             const password = document.getElementById('add-user-password').value;
 
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-                alert('Username tersebut sudah digunakan oleh akun lain!');
-                return;
+            try {
+                const res = await fetch("{{ route('admin.users.store') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ fullname, username, role, password })
+                });
+
+                if (res.ok) {
+                    alert('Akun baru berhasil ditambahkan ke database!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert(err.message || 'Gagal menambahkan akun.');
+                }
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
             }
-
-            const newUser = {
-                id: Date.now(),
-                fullname,
-                username,
-                password,
-                role
-            };
-            users.push(newUser);
-            localStorage.setItem('users', JSON.stringify(users));
-
-            alert('Akun baru berhasil ditambahkan!');
-            e.target.reset();
-            closeAddUserModal();
-            renderAdminData();
         }
 
         /* --- HANDLER UBAH AKUN --- */
-        function openEditUserModal(userId) {
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const user = users.find(u => u.id == userId);
-            if (!user) return;
-
-            document.getElementById('edit-user-id').value = user.id;
-            document.getElementById('edit-user-fullname').value = user.fullname;
-            document.getElementById('edit-user-username').value = user.username;
-            document.getElementById('edit-user-role').value = user.role;
+        function openEditUserModal(userId, name = '', username = '', role = 'siswa') {
+            document.getElementById('edit-user-id').value = userId;
+            document.getElementById('edit-user-fullname').value = name;
+            document.getElementById('edit-user-username').value = username;
+            document.getElementById('edit-user-role').value = role;
             document.getElementById('edit-user-password').value = '';
 
             document.getElementById('modal-edit-user').classList.remove('hidden');
@@ -363,7 +340,7 @@
             document.getElementById('modal-edit-user').classList.add('hidden');
         }
 
-        function handleAdminUpdateUser(e) {
+        async function handleAdminUpdateUser(e) {
             e.preventDefault();
             const id = document.getElementById('edit-user-id').value;
             const fullname = document.getElementById('edit-user-fullname').value.trim();
@@ -371,64 +348,54 @@
             const role = document.getElementById('edit-user-role').value;
             const password = document.getElementById('edit-user-password').value;
 
-            let users = JSON.parse(localStorage.getItem('users')) || [];
+            try {
+                const res = await fetch(`/admin/users/${id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ fullname, username, role, password })
+                });
 
-            // Cek jika username bentrok dengan akun lain
-            if (users.some(u => u.id != id && u.username.toLowerCase() === username.toLowerCase())) {
-                alert('Username tersebut sudah digunakan oleh akun lain!');
-                return;
-            }
-
-            users = users.map(u => {
-                if (u.id == id) {
-                    const updated = {
-                        ...u,
-                        fullname,
-                        username,
-                        role,
-                    };
-                    if (password && password.trim() !== '') {
-                        updated.password = password;
-                    }
-                    return updated;
+                if (res.ok) {
+                    alert('Data akun berhasil diperbarui di database!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert(err.message || 'Gagal memperbarui akun.');
                 }
-                return u;
-            });
-
-            localStorage.setItem('users', JSON.stringify(users));
-
-            // Jika akun yang diubah adalah akun admin yang sedang login, perbarui session
-            if (currentUser && currentUser.id == id) {
-                const me = users.find(u => u.id == id);
-                currentUser = me;
-                sessionStorage.setItem('currentUser', JSON.stringify(me));
-                updateNavHeader();
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
             }
-
-            alert('Data akun berhasil diperbarui!');
-            closeEditUserModal();
-            renderAdminData();
         }
 
         /* --- HANDLER HAPUS AKUN --- */
-        function deleteUserAccount(userId) {
-            if (currentUser && currentUser.id == userId) {
-                alert('Anda tidak dapat menghapus akun yang sedang Anda gunakan saat ini!');
+        async function deleteUserAccount(userId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus akun ini? Akun yang dihapus tidak dapat dipulihkan.')) {
                 return;
             }
 
-            if (confirm('Apakah Anda yakin ingin menghapus akun ini? Akun yang dihapus tidak dapat dipulihkan.')) {
-                let users = JSON.parse(localStorage.getItem('users')) || [];
-                users = users.filter(u => u.id != userId);
-                localStorage.setItem('users', JSON.stringify(users));
+            try {
+                const res = await fetch(`/admin/users/${userId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    }
+                });
 
-                alert('Akun berhasil dihapus!');
-                renderAdminData();
+                if (res.ok) {
+                    alert('Akun berhasil dihapus dari database!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert(err.message || 'Gagal menghapus akun.');
+                }
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
             }
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            renderAdminData();
-        });
     </script>
 @endpush

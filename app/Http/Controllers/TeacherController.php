@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
+use Illuminate\View\View;
+
 class TeacherController extends Controller
 {
-    public function teacher()
+    public function teacher(): View
     {
-        $title = 'Agendaku - Guru';
+        $commonData = $this->getCommonDashboardData();
 
-        return view(
-            'teachers.index',
-            [
-                'title' => $title,
-            ]
-        );
+        $allTasks = Task::with(['user', 'creator'])->latest()->get();
+
+        return view('teachers.index', array_merge($commonData, [
+            'title' => 'Agendaku - Guru',
+            'allTasks' => $allTasks,
+        ]));
     }
 }
