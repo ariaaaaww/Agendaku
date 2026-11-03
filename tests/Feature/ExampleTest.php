@@ -11,3 +11,15 @@ test('login page returns a successful response', function () {
 
     $response->assertStatus(200);
 });
+
+test('register page returns a successful response', function () {
+    $response = $this->get('/register');
+
+    $response->assertStatus(200);
+});
+
+test('student dashboard view still renders without authentication', function () {
+    $response = $this->get('/students');
+
+    $response->assertStatus(200);
+});

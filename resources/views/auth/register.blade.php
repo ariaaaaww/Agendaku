@@ -48,7 +48,7 @@
     </form>
 
     <div class="auth-switch text-center mt-6 text-sm text-text-muted font-semibold">
-      Sudah memiliki akun? <a href="{{ route('login-view') }}" class="text-primary-orange font-extrabold hover:underline">Masuk di sini</a>
+      Sudah memiliki akun? <a href="{{ route('login') }}" class="text-primary-orange font-extrabold hover:underline">Masuk di sini</a>
     </div>
   </div>
 </section>
