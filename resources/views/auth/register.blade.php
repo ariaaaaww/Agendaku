@@ -24,26 +24,25 @@
     <h2 class="text-3xl font-extrabold tracking-tight mb-1 text-text-dark">Buat Akun Baru</h2>
     <p class="text-text-muted text-sm mb-7 font-medium">Mulai atur jadwal akademis dan kegiatan personalmu</p>
 
-    <form onsubmit="handleSignup(event)">
+    @if ($errors->any())
+      <div class="mb-5 p-4 rounded-xl bg-red-100 border-2 border-red-400 text-red-700 text-sm font-bold">
+        {{ $errors->first() }}
+      </div>
+    @endif
+
+    <form method="POST" action="{{ route('register-post') }}">
+      @csrf
       <div class="form-group mb-5">
         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Nama Lengkap</label>
-        <input type="text" id="signup-fullname" placeholder="Contoh: Budi Santoso" required class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
+        <input type="text" name="fullname" id="signup-fullname" value="{{ old('fullname') }}" placeholder="Contoh: Budi Santoso" required class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
       </div>
       <div class="form-group mb-5">
         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Username</label>
-        <input type="text" id="signup-username" placeholder="Buat username unik" required class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
+        <input type="text" name="username" id="signup-username" value="{{ old('username') }}" placeholder="Buat username unik" required class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
       </div>
-      {{-- <div class="form-group mb-5">
-        <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Role / Peran</label>
-        <select id="signup-role" class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
-          <option value="siswa">Siswa</option>
-          <option value="guru">Guru</option>
-          <option value="osis">Pengurus OSIS</option>
-        </select>
-      </div> --}}
       <div class="form-group mb-5">
         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Password</label>
-        <input type="password" id="signup-password" placeholder="••••••••" required class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
+        <input type="password" name="password" id="signup-password" placeholder="••••••••" required class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
       </div>
       <button type="submit" class="btn-primary w-full px-5 py-4 bg-primary-orange text-white border-2 border-text-dark rounded-xl font-extrabold text-base cursor-pointer transition-all duration-200 shadow-pop inline-flex items-center justify-center gap-2 hover:bg-primary-hover hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-pop-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-pop-sm">Daftar Akun 🎉</button>
     </form>

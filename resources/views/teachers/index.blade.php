@@ -79,7 +79,34 @@
                                 <th class="p-4.5 border-b border-border-custom">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="guru-all-tasks-table" class="[&_tr:hover_td]:bg-primary-light"></tbody>
+                        <tbody id="guru-all-tasks-table" class="[&_tr:hover_td]:bg-primary-light">
+                            @if (isset($allTasks) && $allTasks->count() > 0)
+                                @foreach ($allTasks as $t)
+                                    <tr id="guru-task-row-{{ $t->id }}" class="border-b border-border-custom">
+                                        <td class="p-4.5 font-extrabold">{{ $t->title }}</td>
+                                        <td class="p-4.5 font-bold uppercase">{{ $t->category }}</td>
+                                        <td class="p-4.5">{{ \Carbon\Carbon::parse($t->deadline)->format('Y-m-d') }}</td>
+                                        <td class="p-4.5">{{ $t->creator->name ?? ($t->user->name ?? 'System') }}</td>
+                                        <td class="p-4.5 flex items-center gap-2">
+                                            <button
+                                                class="bg-amber-100 text-amber-800 border-2 border-amber-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-amber-400 hover:text-text-dark hover:border-text-dark hover:shadow-pop-sm"
+                                                onclick="openEditGuruModal({{ $t->id }}, '{{ addslashes($t->title) }}', '{{ $t->category }}', '{{ \Carbon\Carbon::parse($t->deadline)->format('Y-m-d') }}')">
+                                                Ubah
+                                            </button>
+                                            <button
+                                                class="bg-red-100 text-red-600 border-2 border-red-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-text-dark hover:shadow-pop-sm"
+                                                onclick="deleteTask({{ $t->id }})">
+                                                Hapus
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="5" class="p-8 text-center text-text-muted font-bold">Belum ada tugas atau acara sistem.</td>
+                                </tr>
+                            @endif
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -142,140 +169,103 @@
 
 @push('scripts')
     <script>
-        function handlePostAnnouncement(e) {
+        async function handlePostAnnouncement(e) {
             e.preventDefault();
             const txt = document.getElementById('announcement-input').value;
-            localStorage.setItem('announcement', txt);
-            alert('Pengumuman telah diperbarui!');
-            e.target.reset();
-            if (typeof renderDashboard === 'function') renderDashboard();
+            try {
+                const res = await fetch("{{ route('announcements.store') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ content: txt })
+                });
+
+                if (res.ok) {
+                    alert('Pengumuman telah diperbarui!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert(err.message || 'Gagal memperbarui pengumuman.');
+                }
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
+            }
         }
 
-        function handleGuruAddTask(e) {
+        async function handleGuruAddTask(e) {
             e.preventDefault();
             const title = document.getElementById('guru-task-title').value;
             const category = document.getElementById('guru-task-type').value;
             const deadline = document.getElementById('guru-task-date').value;
 
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            try {
+                const res = await fetch("{{ route('teachers.tasks.store') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ title, category, deadline })
+                });
 
-            if (category === 'acara') {
-                tasks.push({
-                    id: Date.now(),
-                    userId: 0,
-                    title,
-                    category: 'acara',
-                    deadline,
-                    priority: 'tinggi',
-                    completed: false,
-                    createdBy: currentUser ? currentUser.fullname : 'Guru'
-                });
-            } else {
-                const siswas = users.filter(u => u.role === 'siswa');
-                siswas.forEach(s => {
-                    tasks.push({
-                        id: Date.now() + Math.random(),
-                        userId: s.id,
-                        title: `${title} (Tugas Guru)`,
-                        category: 'sekolah',
-                        deadline,
-                        priority: 'tinggi',
-                        completed: false,
-                        createdBy: currentUser ? currentUser.fullname : 'Guru'
-                    });
-                });
+                if (res.ok) {
+                    alert('Tugas / Acara berhasil ditambahkan ke seluruh siswa & kalender!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert(err.message || 'Gagal menerbitkan tugas/acara.');
+                }
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
             }
-
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            alert('Tugas / Acara berhasil ditambahkan ke seluruh siswa & kalender!');
-            e.target.reset();
-            renderGuruData();
-            if (typeof renderDashboard === 'function') renderDashboard();
         }
 
-        function renderGuruData() {
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-            const table = document.getElementById('guru-all-tasks-table');
-            if (!table) return;
-            table.innerHTML = '';
-
-            tasks.forEach(t => {
-                table.innerHTML += `
-        <tr class="border-b border-border-custom">
-          <td class="p-4.5 font-extrabold">${t.title}</td>
-          <td class="p-4.5 font-bold uppercase">${t.category}</td>
-          <td class="p-4.5">${t.deadline}</td>
-          <td class="p-4.5">${t.createdBy || 'System'}</td>
-          <td class="p-4.5 flex items-center gap-2">
-            <button 
-              class="bg-amber-100 text-amber-800 border-2 border-amber-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-amber-400 hover:text-text-dark hover:border-text-dark hover:shadow-pop-sm" 
-              onclick="openEditGuruModal(${t.id})">
-              Ubah
-            </button>
-            <button 
-              class="bg-red-100 text-red-600 border-2 border-red-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-text-dark hover:shadow-pop-sm" 
-              onclick="deleteTask(${t.id})">
-              Hapus
-            </button>
-          </td>
-        </tr>
-      `;
-            });
-        }
-
-        // 1. Ambil data lama dari localStorage lalu tampilkan di modal
-        function openEditGuruModal(taskId) {
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-            const taskToEdit = tasks.find(t => t.id == taskId);
-            if (!taskToEdit) return;
-
-            document.getElementById('edit-guru-task-id').value = taskToEdit.id;
-            document.getElementById('edit-guru-task-title').value = taskToEdit.title;
-            document.getElementById('edit-guru-task-type').value = taskToEdit.category;
-            document.getElementById('edit-guru-task-date').value = taskToEdit.deadline;
+        function openEditGuruModal(taskId, title = '', category = 'sekolah', deadline = '') {
+            document.getElementById('edit-guru-task-id').value = taskId;
+            document.getElementById('edit-guru-task-title').value = title;
+            document.getElementById('edit-guru-task-type').value = category;
+            document.getElementById('edit-guru-task-date').value = deadline;
 
             document.getElementById('modal-edit-guru').classList.remove('hidden');
         }
 
-        // 2. Tutup modal jika batal / selesai
         function closeEditGuruModal() {
             document.getElementById('modal-edit-guru').classList.add('hidden');
         }
 
-        // 3. Simpan nilai baru ke localStorage saat form modal disubmit
-        function handleGuruUpdateTask(e) {
+        async function handleGuruUpdateTask(e) {
             e.preventDefault();
 
             const id = document.getElementById('edit-guru-task-id').value;
-            const newTitle = document.getElementById('edit-guru-task-title').value.trim();
-            const newCategory = document.getElementById('edit-guru-task-type').value;
-            const newDate = document.getElementById('edit-guru-task-date').value;
+            const title = document.getElementById('edit-guru-task-title').value.trim();
+            const category = document.getElementById('edit-guru-task-type').value;
+            const deadline = document.getElementById('edit-guru-task-date').value;
 
-            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            try {
+                const res = await fetch(`/tasks/${id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ title, category, deadline })
+                });
 
-            tasks = tasks.map(task => {
-                if (task.id == id) {
-                    return {
-                        ...task,
-                        title: newTitle,
-                        category: newCategory,
-                        deadline: newDate
-                    };
+                if (res.ok) {
+                    alert('Tugas / Acara berhasil diperbarui!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert(err.message || 'Gagal memperbarui data.');
                 }
-                return task;
-            });
-
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-
-            alert('Tugas / Acara berhasil diperbarui!');
-            closeEditGuruModal();
-            renderGuruData();
-            if (typeof renderDashboard === 'function') renderDashboard();
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
+            }
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            renderGuruData();
-        });
     </script>
 @endpush

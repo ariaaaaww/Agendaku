@@ -49,7 +49,32 @@
                                 <th class="p-4.5 border-b border-border-custom">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="osis-events-table" class="[&_tr:hover_td]:bg-primary-light"></tbody>
+                        <tbody id="osis-events-table" class="[&_tr:hover_td]:bg-primary-light">
+                            @if (isset($osisEvents) && $osisEvents->count() > 0)
+                                @foreach ($osisEvents as $ev)
+                                    <tr id="osis-event-row-{{ $ev->id }}" class="border-b border-border-custom">
+                                        <td class="p-4.5 font-extrabold">{{ $ev->title }}</td>
+                                        <td class="p-4.5">{{ \Carbon\Carbon::parse($ev->event_date)->format('Y-m-d') }}</td>
+                                        <td class="p-4.5 flex items-center gap-2">
+                                            <button
+                                                class="bg-amber-100 text-amber-800 border-2 border-amber-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-amber-400 hover:text-text-dark hover:border-text-dark hover:shadow-pop-sm"
+                                                onclick="openEditModal({{ $ev->id }}, '{{ addslashes($ev->title) }}', '{{ \Carbon\Carbon::parse($ev->event_date)->format('Y-m-d') }}')">
+                                                Ubah
+                                            </button>
+                                            <button
+                                                class="bg-red-100 text-red-600 border-2 border-red-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-text-dark hover:shadow-pop-sm"
+                                                onclick="deleteOsisEvent({{ $ev->id }})">
+                                                Hapus
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="3" class="p-8 text-center text-text-muted font-bold">Belum ada acara OSIS yang terdaftar.</td>
+                                </tr>
+                            @endif
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -102,107 +127,97 @@
 
 @push('scripts')
     <script>
-        function handleOsisAddEvent(e) {
+        async function handleOsisAddEvent(e) {
             e.preventDefault();
             const title = document.getElementById('osis-event-title').value;
             const deadline = document.getElementById('osis-event-date').value;
 
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-            tasks.push({
-                id: Date.now(),
-                userId: 0,
-                title,
-                category: 'acara',
-                deadline,
-                priority: 'sedang',
-                completed: false,
-                createdBy: 'Pengurus OSIS'
-            });
+            try {
+                const res = await fetch("{{ route('school-events.store') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ title, event_date: deadline })
+                });
 
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            alert('Acara OSIS berhasil dipublikasikan!');
-            e.target.reset();
-            renderOsisData();
-            if (typeof renderDashboard === 'function') renderDashboard();
+                if (res.ok) {
+                    alert('Acara OSIS berhasil dipublikasikan!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert(err.message || 'Gagal menambahkan acara OSIS.');
+                }
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
+            }
         }
 
-        function renderOsisData() {
-            const tasks = (JSON.parse(localStorage.getItem('tasks')) || []).filter(t => t.category === 'acara');
-            const table = document.getElementById('osis-events-table');
-            if (!table) return;
-            table.innerHTML = '';
-
-            tasks.forEach(ev => {
-                table.innerHTML += `
-                    <tr class="border-b border-border-custom">
-                        <td class="p-4.5 font-extrabold">${ev.title}</td>
-                        <td class="p-4.5">${ev.deadline}</td>
-                        <td class="p-4.5 flex items-center gap-2">
-                            <button 
-                                class="bg-amber-100 text-amber-800 border-2 border-amber-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-amber-400 hover:text-text-dark hover:border-text-dark hover:shadow-pop-sm" 
-                                onclick="openEditModal(${ev.id})">
-                                Ubah
-                            </button>
-                            <button 
-                                class="bg-red-100 text-red-600 border-2 border-red-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-text-dark hover:shadow-pop-sm" 
-                                onclick="deleteTask(${ev.id})">
-                                Hapus
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        // 1. Ambil data lama dari localStorage lalu tampilkan di modal
-        function openEditModal(eventId) {
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-            const eventToEdit = tasks.find(t => t.id === eventId);
-            if (!eventToEdit) return;
-
-            document.getElementById('edit-event-id').value = eventToEdit.id;
-            document.getElementById('edit-event-title').value = eventToEdit.title;
-            document.getElementById('edit-event-date').value = eventToEdit.deadline;
+        function openEditModal(eventId, title = '', date = '') {
+            document.getElementById('edit-event-id').value = eventId;
+            document.getElementById('edit-event-title').value = title;
+            document.getElementById('edit-event-date').value = date;
 
             document.getElementById('modal-edit-osis').classList.remove('hidden');
         }
 
-        // 2. Tutup modal jika batal / selesai
         function closeEditModal() {
             document.getElementById('modal-edit-osis').classList.add('hidden');
         }
 
-        // 3. Simpan nilai baru ke localStorage saat form modal disubmit
-        function handleOsisUpdateEvent(e) {
+        async function handleOsisUpdateEvent(e) {
             e.preventDefault();
 
-            const id = Number(document.getElementById('edit-event-id').value);
-            const newTitle = document.getElementById('edit-event-title').value.trim();
-            const newDate = document.getElementById('edit-event-date').value;
+            const id = document.getElementById('edit-event-id').value;
+            const title = document.getElementById('edit-event-title').value.trim();
+            const date = document.getElementById('edit-event-date').value;
 
-            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            try {
+                const res = await fetch(`/school-events/${id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ title, event_date: date })
+                });
 
-            tasks = tasks.map(task => {
-                if (task.id === id) {
-                    return {
-                        ...task,
-                        title: newTitle,
-                        deadline: newDate
-                    };
+                if (res.ok) {
+                    alert('Acara OSIS berhasil diperbarui!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert(err.message || 'Gagal memperbarui acara.');
                 }
-                return task;
-            });
-
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-
-            alert('Acara OSIS berhasil diperbarui!');
-            closeEditModal();
-            renderOsisData();
-            if (typeof renderDashboard === 'function') renderDashboard();
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            renderOsisData();
-        });
+        async function deleteOsisEvent(id) {
+            if (!confirm('Apakah Anda yakin ingin menghapus acara OSIS ini?')) return;
+
+            try {
+                const res = await fetch(`/school-events/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    }
+                });
+
+                if (res.ok) {
+                    alert('Acara berhasil dihapus!');
+                    window.location.reload();
+                } else {
+                    alert('Gagal menghapus acara.');
+                }
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
+            }
+        }
     </script>
 @endpush
