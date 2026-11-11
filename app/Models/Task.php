@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Task extends Model
+{
+    protected $fillable = [
+        'user_id',
+        'created_by_id',
+        'title',
+        'category',
+        'deadline',
+        'priority',
+        'is_completed',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'deadline' => 'date',
+            'is_completed' => 'boolean',
+        ];
+    }
+}

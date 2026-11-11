@@ -10,8 +10,39 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
+    /* 1. Font Family */
     --font-sans:
-        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
+        "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* 2. Custom Colors */
+    --color-bg-main: #fbf9f5;
+    --color-bg-card: #ffffff;
+    --color-bg-sidebar: #ffffff;
+    --color-primary-orange: #ff5a36;
+    --color-primary-hover: #e04725;
+    --color-primary-light: #fff0ed;
+    --color-secondary-teal: #2ec4b6;
+    --color-secondary-light: #e8f9f8;
+    --color-accent-yellow: #ffb800;
+    --color-accent-yellow-light: #fff9e6;
+    --color-text-dark: #1e2522;
+    --color-text-muted: #6c7571;
+    --color-border-custom: #e8e3d9;
+    --color-cat-sekolah: #ff5e3a;
+    --color-cat-sekolah-bg: #ffdfd8;
+    --color-cat-pribadi: #10b981;
+    --color-cat-pribadi-bg: #ecfdf5;
+    --color-cat-acara: #8b5cf6;
+    --color-cat-acara-bg: #f5f3ff;
+    --color-prio-tinggi: #ef4444;
+    --color-prio-sedang: #f59e0b;
+    --color-prio-rendah: #10b981;
+
+    /* 3. Custom Box Shadows */
+    --shadow-pop: 4px 4px 0px #1e2522;
+    --shadow-pop-lg: 6px 6px 0px #1e2522;
+    --shadow-pop-xl: 8px 8px 0px #1e2522;
+    --shadow-pop-sm: 2px 2px 0px #1e2522;
+    --shadow-pop-3px: 3px 3px 0px #1e2522;
+    --shadow-pop-5px: 5px 5px 0px #1e2522;
 }

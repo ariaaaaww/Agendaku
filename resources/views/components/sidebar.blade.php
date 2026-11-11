@@ -52,21 +52,94 @@
             <span class="icon-[akar-icons--plus]"></span> Tambah Agenda
         </button>
         @auth
-            @if (auth()->user()->role !== 'siswa')
-                @php
-                    $roleConfig = match (auth()->user()->role) {
-                        'admin' => ['icon' => 'clarity--administrator-line', 'label' => 'Panel Admin', 'route' => 'admin.index'],
-                        'guru' => ['icon' => 'ci--users', 'label' => 'Panel Guru', 'route' => 'teachers.index'],
-                        'osis' => ['icon' => 'ci--users', 'label' => 'Panel OSIS', 'route' => 'council.index'],
-                        default => null,
-                    };
-                @endphp
-                @if ($roleConfig)
+            @php
+                $currentRole =
+                    auth()->user()->role instanceof \App\Enums\UserRole
+                        ? auth()->user()->role->value
+                        : auth()->user()->role ?? 'student';
+            @endphp
+
+            {{-- 1. ROLE ADMIN: Dapat melihat dan mengakses semua panel khusus setiap role --}}
+            @if ($currentRole === 'admin')
+                <div class="my-2 border-t-2 border-dashed border-border-custom"></div>
+                <div class="px-2 text-[0.65rem] font-extrabold uppercase tracking-wider text-text-muted">Akses Khusus Admin</div>
+
+                {{-- Panel Admin --}}
+                @if (request()->routeIs('admin.*') || request()->is('admin*'))
                     <button onclick="switchTab('role-panel')" id="tab-btn-role"
                         class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
-                        <span class="icon-[{{ $roleConfig['icon'] }}]"></span> {{ $roleConfig['label'] }}
+                        <span class="icon-[clarity--administrator-line]"></span> Panel Admin
                     </button>
+                @else
+                    <a href="{{ route('admin.index') }}"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1">
+                        <span class="icon-[clarity--administrator-line]"></span> Panel Admin
+                    </a>
                 @endif
+
+                {{-- Panel Guru --}}
+                @if (request()->routeIs('teachers.*') || request()->is('teacher*'))
+                    <button onclick="switchTab('role-panel')" id="tab-btn-role"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
+                        <span class="icon-[ci--users]"></span> Panel Guru
+                    </button>
+                @else
+                    <a href="{{ route('teachers.index') }}"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1">
+                        <span class="icon-[ci--users]"></span> Panel Guru
+                    </a>
+                @endif
+
+                {{-- Panel OSIS --}}
+                @if (request()->routeIs('council.*') || request()->is('council*'))
+                    <button onclick="switchTab('role-panel')" id="tab-btn-role"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
+                        <span class="icon-[ci--users]"></span> Panel OSIS
+                    </button>
+                @else
+                    <a href="{{ route('council.index') }}"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1">
+                        <span class="icon-[ci--users]"></span> Panel OSIS
+                    </a>
+                @endif
+
+                {{-- Halaman Siswa --}}
+                @if (!request()->routeIs('students.*') && !request()->is('students*'))
+                    <a href="{{ route('students.index') }}"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1">
+                        <span class="icon-[akar-icons--calendar]"></span> Halaman Siswa
+                    </a>
+                @endif
+
+            {{-- 2. ROLE GURU: Hanya melihat Panel Guru --}}
+            @elseif ($currentRole === 'teacher' || $currentRole === 'guru')
+                @if (request()->routeIs('teachers.*') || request()->is('teacher*'))
+                    <button onclick="switchTab('role-panel')" id="tab-btn-role"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
+                        <span class="icon-[ci--users]"></span> Panel Guru
+                    </button>
+                @else
+                    <a href="{{ route('teachers.index') }}"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1">
+                        <span class="icon-[ci--users]"></span> Panel Guru
+                    </a>
+                @endif
+
+            {{-- 3. ROLE OSIS: Hanya melihat Panel OSIS --}}
+            @elseif ($currentRole === 'council' || $currentRole === 'osis')
+                @if (request()->routeIs('council.*') || request()->is('council*'))
+                    <button onclick="switchTab('role-panel')" id="tab-btn-role"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
+                        <span class="icon-[ci--users]"></span> Panel OSIS
+                    </button>
+                @else
+                    <a href="{{ route('council.index') }}"
+                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1">
+                        <span class="icon-[ci--users]"></span> Panel OSIS
+                    </a>
+                @endif
+
+            {{-- 4. ROLE SISWA (student/siswa): Tidak menampilkan panel tambahan --}}
             @endif
         @endauth
     </div>
@@ -77,13 +150,21 @@
         @auth
             @php
                 $roleColors = [
+                    'student' => 'bg-primary-light text-primary-orange border-primary-orange/30',
                     'siswa' => 'bg-primary-light text-primary-orange border-primary-orange/30',
                     'admin' => 'bg-amber-100 text-amber-700 border-amber-500/30',
+                    'teacher' => 'bg-green-100 text-green-700 border-green-600/30',
                     'guru' => 'bg-green-100 text-green-700 border-green-600/30',
+                    'council' => 'bg-purple-100 text-purple-700 border-purple-600/30',
                     'osis' => 'bg-purple-100 text-purple-700 border-purple-600/30',
                 ];
-                $userRole = auth()->user()->role ?? 'siswa';
-                $roleClass = $roleColors[$userRole] ?? $roleColors['siswa'];
+
+                $userRole =
+                    auth()->user()->role instanceof \App\Enums\UserRole
+                        ? auth()->user()->role->value
+                        : auth()->user()->role ?? 'student';
+
+                $roleClass = $roleColors[$userRole] ?? $roleColors['student'];
             @endphp
             <div class="user-profile-header flex items-center gap-3">
                 <div class="user-avatar w-10 h-10 rounded-full bg-secondary-light border-2 border-secondary-teal grid place-items-center font-extrabold color-secondary-teal text-[1rem]"
@@ -102,7 +183,8 @@
                     Akun</button>
             </form>
         @else
-            <a href="{{ route('login') }}" class="btn-primary w-full p-2.5 bg-primary-orange text-white text-center font-extrabold text-xs rounded-xl shadow-pop">Masuk</a>
+            <a href="{{ route('login') }}"
+                class="btn-primary w-full p-2.5 bg-primary-orange text-white text-center font-extrabold text-xs rounded-xl shadow-pop">Masuk</a>
         @endauth
     </div>
 
