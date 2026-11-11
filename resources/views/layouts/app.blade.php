@@ -14,55 +14,7 @@
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&display=swap"
         rel="stylesheet">
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-                    },
-                    colors: {
-                        'bg-main': '#FBF9F5',
-                        'bg-card': '#FFFFFF',
-                        'bg-sidebar': '#FFFFFF',
-                        'primary-orange': '#FF5A36',
-                        'primary-hover': '#E04725',
-                        'primary-light': '#FFF0ED',
-                        'secondary-teal': '#2EC4B6',
-                        'secondary-light': '#E8F9F8',
-                        'accent-yellow': '#FFB800',
-                        'accent-yellow-light': '#FFF9E6',
-                        'text-dark': '#1E2522',
-                        'text-muted': '#6C7571',
-                        'border-custom': '#E8E3D9',
-                        // 'cat-sekolah': '#3A86EF',
-                        'cat-sekolah': '#FF5E3A',
-                        // 'cat-sekolah-bg': '#EFF6FF',
-                        'cat-sekolah-bg': '#FFDFD8',
-                        'cat-pribadi': '#10B981',
-                        'cat-pribadi-bg': '#ECFDF5',
-                        'cat-acara': '#8B5CF6',
-                        'cat-acara-bg': '#F5F3FF',
-                        'prio-tinggi': '#EF4444',
-                        'prio-sedang': '#F59E0B',
-                        'prio-rendah': '#10B981',
-                    },
-                    boxShadow: {
-                        'pop': '4px 4px 0px #1E2522',
-                        'pop-lg': '6px 6px 0px #1E2522',
-                        'pop-xl': '8px 8px 0px #1E2522',
-                        'pop-sm': '2px 2px 0px #1E2522',
-                        'pop-3px': '3px 3px 0px #1E2522',
-                        'pop-5px': '5px 5px 0px #1E2522',
-                    }
-                }
-            }
-        }
-    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    {{-- @vite(['resources/js/app.js']) --}}
     @stack('styles')
 </head>
 

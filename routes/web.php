@@ -1,105 +1,89 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CouncilController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
-/**
- * Data kosong agar Blade dashboard tidak error sebelum backend dibangun ulang.
- *
- * @return array<string, mixed>
- */
-if (! function_exists('agendakuEmptyDashboard')) {
-    function agendakuEmptyDashboard(string $title): array
-    {
-        return [
-            'title' => $title,
-            'announcement' => null,
-            'alertData' => [
-                'type' => 'empty',
-                'count' => 0,
-                'message' => 'Tidak ada tenggat waktu atau agenda esok hari. Semuanya terkendali!',
-            ],
-            'pendingTasks' => collect(),
-            'schoolEvents' => collect(),
-            'allTasks' => collect(),
-            'osisEvents' => collect(),
-            'allEvents' => collect(),
-            'allUsers' => collect(),
-            'studentProgress' => collect(),
-            'totalUsers' => 0,
-            'totalCompletedTasks' => 0,
-            'totalPendingTasks' => 0,
-        ];
-    }
-}
-
-/*
-|--------------------------------------------------------------------------
-| Halaman frontend Agendaku
-|--------------------------------------------------------------------------
-|
-| Controller, autentikasi, dan middleware khusus aplikasi sudah dihapus
-| agar bisa dibangun ulang. Route di bawah hanya menampilkan Blade yang
-| sudah ada. Form POST dan aksi CRUD sengaja tidak diproses.
-|
-*/
-
+// Redirect root to login
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/login', function () {
-    return view('auth.login', ['title' => 'Agendaku - Login']);
-})->name('login');
+// Authentication Routes
+Route::get('/login', [AuthController::class, 'loginView'])->name('login');
+Route::post('/login', [AuthController::class, 'loginPost'])->name('login-post');
+Route::get('/register', [AuthController::class, 'registerView'])->name('register-view');
+Route::post('/register', [AuthController::class, 'registerPost'])->name('register-post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-Route::get('/register', function () {
-    return view('auth.register', ['title' => 'Agendaku - Register']);
-})->name('register-view');
+// 1. Student Routes (Middleware: auth, role:student)
+Route::middleware(['auth', 'role:student,admin'])->group(function () {
+    Route::get('/students', [StudentController::class, 'index'])->name('students.index');
 
-Route::get('/students', function () {
-    return view('students.index', agendakuEmptyDashboard('Agendaku - Siswa'));
-})->name('students.index');
+    // Task Management
+    Route::prefix('tasks')->as('tasks.')->group(function () {
+        Route::post('/', fn () => abort(501, 'Penyimpanan tugas belum diimplementasikan.'))->name('store');
+        Route::put('/{task}', fn () => abort(501, 'Pembaruan tugas belum diimplementasikan.'))->name('update');
+        Route::patch('/{task}/toggle', fn () => abort(501, 'Toggle tugas belum diimplementasikan.'))->name('toggle');
+        Route::delete('/{task}', fn () => abort(501, 'Penghapusan tugas belum diimplementasikan.'))->name('destroy');
+    });
+});
 
-Route::get('/teacher', function () {
-    return view('teachers.index', agendakuEmptyDashboard('Agendaku - Guru'));
-})->name('teachers.index');
+// 2. Teacher Routes (Middleware: auth, role:teacher)
+Route::middleware(['auth', 'role:teacher,admin'])->prefix('teacher')->as('teachers.')->group(function () {
+    Route::get('/', [TeacherController::class, 'index'])->name('index');
+    Route::post('/tasks', fn () => abort(501, 'Penerbitan tugas guru belum diimplementasikan.'))->name('tasks.store');
 
-Route::get('/council', function () {
-    return view('council.index', agendakuEmptyDashboard('Agendaku - OSIS'));
-})->name('council.index');
+    // Rute pengumuman bisa berada di dalam group ini jika khusus untuk guru
+    Route::post('/announcements', fn () => abort(501, 'Pengumuman belum diimplementasikan.'))->name('announcements.store');
+});
 
-Route::get('/admin', function () {
-    return view('admin.index', agendakuEmptyDashboard('Agendaku - Admin'));
-})->name('admin.index');
+// 3. Council (OSIS) Routes (Middleware: auth, role:council)
+Route::middleware(['auth', 'role:council,admin'])->group(function () {
+    Route::get('/council', [CouncilController::class, 'index'])->name('council.index');
 
-/*
-| Nama route lama dipertahankan agar Blade dan JavaScript tidak error
-| saat memanggil route(). Handler tidak menyimpan data dan tidak login.
-*/
-Route::post('/login', fn () => abort(501, 'Proses login belum diimplementasikan.'))->name('login-post');
-Route::post('/register', fn () => abort(501, 'Proses register belum diimplementasikan.'))->name('register-post');
-Route::post('/logout', fn () => abort(501, 'Proses logout belum diimplementasikan.'))->name('logout');
-Route::post('/tasks', fn () => abort(501, 'Penyimpanan tugas belum diimplementasikan.'))->name('tasks.store');
-Route::put('/tasks/{task}', fn () => abort(501, 'Pembaruan tugas belum diimplementasikan.'))->name('tasks.update');
-Route::patch('/tasks/{task}/toggle', fn () => abort(501, 'Toggle tugas belum diimplementasikan.'))->name('tasks.toggle');
-Route::delete('/tasks/{task}', fn () => abort(501, 'Penghapusan tugas belum diimplementasikan.'))->name('tasks.destroy');
-Route::post('/teacher/tasks', fn () => abort(501, 'Penerbitan tugas guru belum diimplementasikan.'))->name('teachers.tasks.store');
-Route::post('/announcements', fn () => abort(501, 'Pengumuman belum diimplementasikan.'))->name('announcements.store');
-Route::post('/school-events', fn () => abort(501, 'Acara sekolah belum diimplementasikan.'))->name('school-events.store');
-Route::put('/school-events/{schoolEvent}', fn () => abort(501, 'Pembaruan acara belum diimplementasikan.'))->name('school-events.update');
-Route::delete('/school-events/{schoolEvent}', fn () => abort(501, 'Penghapusan acara belum diimplementasikan.'))->name('school-events.destroy');
-Route::post('/admin/users', fn () => abort(501, 'Manajemen pengguna belum diimplementasikan.'))->name('admin.users.store');
-Route::put('/admin/users/{user}', fn () => abort(501, 'Pembaruan pengguna belum diimplementasikan.'))->name('admin.users.update');
-Route::delete('/admin/users/{user}', fn () => abort(501, 'Penghapusan pengguna belum diimplementasikan.'))->name('admin.users.destroy');
+    // Event Management
+    Route::prefix('school-events')->as('school-events.')->group(function () {
+        Route::post('/', fn () => abort(501, 'Acara sekolah belum diimplementasikan.'))->name('store');
+        Route::put('/{schoolEvent}', fn () => abort(501, 'Pembaruan acara belum diimplementasikan.'))->name('update');
+        Route::delete('/{schoolEvent}', fn () => abort(501, 'Penghapusan acara belum diimplementasikan.'))->name('destroy');
+    });
+});
 
+// 4. Admin Routes (Middleware: auth, role:admin)
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+
+    // User Management
+    Route::prefix('users')->as('users.')->group(function () {
+        Route::post('/', fn () => abort(501, 'Manajemen pengguna belum diimplementasikan.'))->name('store');
+        Route::put('/{user}', fn () => abort(501, 'Pembaruan pengguna belum diimplementasikan.'))->name('update');
+        Route::delete('/{user}', fn () => abort(501, 'Penghapusan pengguna belum diimplementasikan.'))->name('destroy');
+    });
+});
+
+// Calendar
 Route::get('/api/calendar/month', function () {
     $year = (int) request('year', now()->year);
     $month = (int) request('month', now()->month);
     $date = now()->setDate($year, $month, 1)->startOfMonth();
 
     $monthNames = [
-        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        1 => 'Januari',
+        2 => 'Februari',
+        3 => 'Maret',
+        4 => 'April',
+        5 => 'Mei',
+        6 => 'Juni',
+        7 => 'Juli',
+        8 => 'Agustus',
+        9 => 'September',
+        10 => 'Oktober',
+        11 => 'November',
+        12 => 'Desember',
     ];
 
     return response()->json([

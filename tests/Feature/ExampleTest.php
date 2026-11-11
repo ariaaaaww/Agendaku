@@ -18,8 +18,8 @@ test('register page returns a successful response', function () {
     $response->assertStatus(200);
 });
 
-test('student dashboard view still renders without authentication', function () {
+test('student dashboard requires authentication', function () {
     $response = $this->get('/students');
 
-    $response->assertStatus(200);
+    $response->assertRedirect('/login');
 });
