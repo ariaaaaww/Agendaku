@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Task extends Model
 {
@@ -22,5 +23,13 @@ class Task extends Model
             'deadline' => 'date',
             'is_completed' => 'boolean',
         ];
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by_id');
     }
 }
