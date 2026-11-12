@@ -1,11 +1,11 @@
 <!-- FIXED VERTICAL SIDEBAR / HEADER -->
 <header
     class="app-header fixed top-0 left-0 bottom-0 w-full max-lg:h-[72px] lg:w-[280px] bg-bg-sidebar max-lg:border-b-2 lg:border-r-2 
-    border-text-dark lg:border-border-custom flex flex-row lg:flex-col justify-between items-center lg:items-stretch p-3.5 lg:py-8 lg:px-8 z-[1000] lg:z-[100] 
-    transition-all duration-300 shadow-sm"
+    border-text-dark lg:border-border-custom flex flex-row lg:flex-col justify-between items-center lg:items-stretch p-3.5 lg:py-6 lg:px-6 z-[1000] lg:z-[100] 
+    transition-all duration-300 shadow-sm lg:overflow-y-auto"
     id="app-header">
 
-    <div class="flex items-center justify-between w-full">
+    <div class="flex items-center justify-between w-full shrink-0">
         <div class="brand flex items-center gap-3.5 lg:pb-6 lg:border-b-2 lg:border-dashed lg:border-border-custom group cursor-pointer"
             onclick="goToRoleHome()">
             <div
@@ -62,7 +62,8 @@
             {{-- 1. ROLE ADMIN: Dapat melihat dan mengakses semua panel khusus setiap role --}}
             @if ($currentRole === 'admin')
                 <div class="my-2 border-t-2 border-dashed border-border-custom"></div>
-                <div class="px-2 text-[0.65rem] font-extrabold uppercase tracking-wider text-text-muted">Akses Khusus Admin</div>
+                <div class="px-2 text-[0.65rem] font-extrabold uppercase tracking-wider text-text-muted">Akses Khusus Admin
+                </div>
 
                 {{-- Panel Admin --}}
                 @if (request()->routeIs('admin.*') || request()->is('admin*'))
@@ -111,7 +112,7 @@
                     </a>
                 @endif
 
-            {{-- 2. ROLE GURU: Hanya melihat Panel Guru --}}
+                {{-- 2. ROLE GURU: Hanya melihat Panel Guru --}}
             @elseif ($currentRole === 'teacher' || $currentRole === 'guru')
                 @if (request()->routeIs('teachers.*') || request()->is('teacher*'))
                     <button onclick="switchTab('role-panel')" id="tab-btn-role"
@@ -125,7 +126,7 @@
                     </a>
                 @endif
 
-            {{-- 3. ROLE OSIS: Hanya melihat Panel OSIS --}}
+                {{-- 3. ROLE OSIS: Hanya melihat Panel OSIS --}}
             @elseif ($currentRole === 'council' || $currentRole === 'osis')
                 @if (request()->routeIs('council.*') || request()->is('council*'))
                     <button onclick="switchTab('role-panel')" id="tab-btn-role"
@@ -139,14 +140,14 @@
                     </a>
                 @endif
 
-            {{-- 4. ROLE SISWA (student/siswa): Tidak menampilkan panel tambahan --}}
+                {{-- 4. ROLE SISWA (student/siswa): Tidak menampilkan panel tambahan --}}
             @endif
         @endauth
     </div>
 
     <!-- User Profile Box -->
     <div id="nav-user-info"
-        class="user-profile-nav flex bg-bg-main border-2 border-border-custom rounded-3xl p-4 flex-col gap-3.5 mt-6 max-lg:fixed max-lg:bottom-0 max-lg:-left-full max-lg:w-[280px] max-lg:rounded-none max-lg:border-r-2 max-lg:border-text-dark max-lg:border-t-2 max-lg:border-border-custom max-lg:z-[1000] max-lg:mt-0 transition-[left] duration-300">
+    class="user-profile-nav flex bg-bg-main border-2 border-border-custom rounded-3xl p-4 flex-col gap-3.5 mt-6 shrink-0 max-lg:fixed max-lg:bottom-0 max-lg:-left-full max-lg:w-[280px] max-lg:rounded-none max-lg:border-r-2 max-lg:border-text-dark max-lg:border-t-2 max-lg:border-border-custom max-lg:z-[1000] max-lg:mt-0 transition-[left] duration-300">
         @auth
             @php
                 $roleColors = [

@@ -33,9 +33,21 @@ class TaskController extends Controller
         return back()->with('success', 'Agenda berhasil ditambahkan ke kalender!');
     }
 
+    public function update(Request $request, Task $task): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|in:sekolah,pribadi',
+            'deadline' => 'required|date',
+            'priority' => 'required|in:tinggi,sedang,rendah',
+        ]);
+        $task->update($validated);
+        return back()->with('success', 'Agenda berhasil diperbarui!');
+    }
+
     public function toggle(Task $task)
     {
-        $task->update(['is_completed' => ! $task->is_completed]);
+        $task->update(['is_completed' => !$task->is_completed]);
 
         return back();
     }

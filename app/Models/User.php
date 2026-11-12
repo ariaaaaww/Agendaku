@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -48,5 +49,21 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => UserRole::class,
         ];
+    }
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'user_id');
+    }
+    public function createdTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'created_by_id');
+    }
+    public function events(): HasMany
+    {
+        return $this->hasMany(SchoolEvent::class, 'user_id');
+    }
+    public function announcements(): HasMany
+    {
+        return $this->hasMany(Announcement::class, 'user_id');
     }
 }
