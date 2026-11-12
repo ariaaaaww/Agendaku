@@ -13,7 +13,7 @@
     <!-- Auth Header with Brand -->
     <div class="auth-header-bar flex items-center gap-7 mb-6 pb-4 border-b-2 border-dashed border-border-custom">
       <div class="brand flex items-center gap-3 border-none pb-0">
-        <div class="brand-logo w-10 h-10 bg-primary-orange rounded-xl grid place-items-center text-white font-extrabold text-lg ">A</div>
+        <div class="brand-logo w-10 h-10 bg-primary-orange rounded-xl grid place-items-center text-white font-extrabold text-lg -rotate-3">A</div>
         <div class="brand-text">
           <h1 class="text-lg font-extrabold leading-tight text-text-dark">Agendaku</h1>
           <span class="text-[0.65rem] font-bold text-primary-orange uppercase tracking-wider block">Class&Life Sync</span>
@@ -24,6 +24,14 @@
     <h2 class="text-3xl font-extrabold tracking-tight mb-1 text-text-dark">Selamat Datang!</h2>
     <p class="text-text-muted text-sm mb-7 font-medium">Masuk ke akun Agendaku Anda untuk melanjutkan</p>
 
+    {{-- Pesan sukses setelah daftar akun (dikirim dari registerPost) --}}
+    @if (session('success'))
+      <div class="mb-5 p-4 rounded-xl bg-green-100 border-2 border-green-400 text-green-700 text-sm font-bold">
+        {{ session('success') }}
+      </div>
+    @endif
+
+    {{-- Pesan error login --}}
     @if ($errors->any())
       <div class="mb-5 p-4 rounded-xl bg-red-100 border-2 border-red-400 text-red-700 text-sm font-bold">
         {{ $errors->first() }}
@@ -33,20 +41,27 @@
     <form method="POST" action="{{ route('login-post') }}">
       @csrf
       <div class="form-group mb-5">
-        <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Username</label>
-        <input type="text" name="username" id="login-username" value="{{ old('username') }}" placeholder="Masukkan username" required class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
+        <label for="login-username" class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Username</label>
+        <input type="text" name="username" id="login-username" value="{{ old('username') }}" placeholder="Masukkan username" required autofocus autocomplete="username" class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
       </div>
       <div class="form-group mb-5">
-        <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Password</label>
+        <label for="login-password" class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Password</label>
         <input type="password" name="password" id="login-password" placeholder="••••••••" required class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
       </div>
+
+      {{-- Dibaca oleh $request->boolean('remember') di loginPost --}}
+      <label class="flex items-center gap-2 mb-5 text-sm font-semibold text-text-muted cursor-pointer">
+        <input type="checkbox" name="remember" class="w-4 h-4 accent-primary-orange">
+        Ingat saya
+      </label>
+
       <button type="submit" class="btn-primary w-full px-5 py-4 bg-primary-orange text-white border-2 border-text-dark rounded-xl font-extrabold text-base cursor-pointer transition-all duration-200 shadow-pop inline-flex items-center justify-center gap-2 hover:bg-primary-hover hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-pop-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-pop-sm">Masuk Sekarang 🚀</button>
     </form>
 
+    <!-- Link ke halaman register -->
     <div class="auth-switch text-center mt-6 text-sm text-text-muted font-semibold">
       Belum punya akun? <a href="{{ route('register-view') }}" class="text-primary-orange font-extrabold hover:underline">Daftar akun baru</a>
     </div>
   </div>
 </section>
 @endsection
-

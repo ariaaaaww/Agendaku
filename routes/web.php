@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /**
  * Data kosong agar Blade dashboard tidak error sebelum backend dibangun ulang.
@@ -47,13 +48,12 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/login', function () {
-    return view('auth.login', ['title' => 'Agendaku - Login']);
-})->name('login');
-
-Route::get('/register', function () {
-    return view('auth.register', ['title' => 'Agendaku - Register']);
-})->name('register-view');
+// Authentication Routes
+Route::get('/login', [AuthController::class, 'loginView'])->name('login');
+Route::post('/login', [AuthController::class, 'loginPost'])->name('login-post');
+Route::get('/register', [AuthController::class, 'registerView'])->name('register-view');
+Route::post('/register', [AuthController::class, 'registerPost'])->name('register-post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::get('/students', function () {
     return view('students.index', agendakuEmptyDashboard('Agendaku - Siswa'));
@@ -73,11 +73,8 @@ Route::get('/admin', function () {
 
 /*
 | Nama route lama dipertahankan agar Blade dan JavaScript tidak error
-| saat memanggil route(). Handler tidak menyimpan data dan tidak login.
+| saat memanggil route(). Handler tidak menyimpan data.
 */
-Route::post('/login', fn () => abort(501, 'Proses login belum diimplementasikan.'))->name('login-post');
-Route::post('/register', fn () => abort(501, 'Proses register belum diimplementasikan.'))->name('register-post');
-Route::post('/logout', fn () => abort(501, 'Proses logout belum diimplementasikan.'))->name('logout');
 Route::post('/tasks', fn () => abort(501, 'Penyimpanan tugas belum diimplementasikan.'))->name('tasks.store');
 Route::put('/tasks/{task}', fn () => abort(501, 'Pembaruan tugas belum diimplementasikan.'))->name('tasks.update');
 Route::patch('/tasks/{task}/toggle', fn () => abort(501, 'Toggle tugas belum diimplementasikan.'))->name('tasks.toggle');
