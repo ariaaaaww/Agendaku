@@ -8,25 +8,22 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    /**
-     * Menyimpan agenda baru yang dikirim dari form Blade
-     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|in:sekolah,pribadi',
+            'category' => 'required|in:sekolah,pribadi', // Sebelumnya 'sekolah,acara'
             'deadline' => 'required|date',
-            'priority' => 'required|in:tinggi,sedang,rendah',
+            'priority' => 'nullable|in:tinggi,sedang,rendah',
         ]);
 
         Task::create([
-            'user_id' => auth()->id(), // ID siswa yang sedang login
+            'user_id' => auth()->id(),
             'created_by_id' => auth()->id(),
             'title' => $validated['title'],
             'category' => $validated['category'],
             'deadline' => $validated['deadline'],
-            'priority' => $validated['priority'],
+            'priority' => $validated['priority'] ?? 'sedang',
             'is_completed' => false,
         ]);
 
@@ -37,22 +34,23 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|in:sekolah,pribadi',
+            'category' => 'required|in:sekolah,acara',
             'deadline' => 'required|date',
-            'priority' => 'required|in:tinggi,sedang,rendah',
         ]);
+
         $task->update($validated);
+
         return back()->with('success', 'Agenda berhasil diperbarui!');
     }
 
-    public function toggle(Task $task)
+    public function toggle(Task $task): RedirectResponse
     {
         $task->update(['is_completed' => !$task->is_completed]);
 
         return back();
     }
 
-    public function destroy(Task $task)
+    public function destroy(Task $task): RedirectResponse
     {
         $task->delete();
 

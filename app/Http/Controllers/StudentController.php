@@ -16,32 +16,24 @@ class StudentController extends Controller
         $user = auth()->user();
         $today = Carbon::today();
         $tomorrow = Carbon::tomorrow();
-        // 1. Data Kalender
-        $year = (int) $request->get('year', now()->year);
-        $month = (int) $request->get('month', now()->month);
-        $calDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
-        $daysInMonth = $calDate->daysInMonth;
-        $firstDayOfWeek = $calDate->dayOfWeek;
-        // Ambil agenda bulan ini untuk kalender
-        $calAgendas = Task::where('user_id', $user->id)
-            ->whereBetween('deadline', [$calDate->copy()->startOfMonth(), $calDate->copy()->endOfMonth()])
-            ->where('is_completed', false)
-            ->get()
-            ->groupBy(fn($t) => Carbon::parse($t->deadline)->format('Y-m-d'));
-        // 2. To-Do List Siswa: Ambil tugas yang belum selesai, urutkan dari deadline terdekat
+
+        // 1. To-Do List Siswa: Ambil tugas yang belum selesai, urutkan dari deadline terdekat
         $pendingTasks = Task::where('user_id', $user->id)
             ->where('is_completed', false)
             ->orderBy('deadline', 'asc')
             ->get();
-        // 3. Logika Alert Banner Deadline Otomatis
+
+        // 2. Logika Alert Banner Deadline Otomatis
         $overdueTasks = $pendingTasks->filter(fn($t) => Carbon::parse($t->deadline)->lt($today));
         $todayTasks = $pendingTasks->filter(fn($t) => Carbon::parse($t->deadline)->isSameDay($today));
         $tomorrowTasks = $pendingTasks->filter(fn($t) => Carbon::parse($t->deadline)->isSameDay($tomorrow));
+
         $alertData = [
             'type' => 'empty',
             'count' => 0,
             'message' => 'Tidak ada tenggat waktu atau agenda esok hari. Semuanya terkendali!',
         ];
+
         if ($overdueTasks->isNotEmpty()) {
             $alertData = [
                 'type' => 'overdue',
@@ -61,20 +53,20 @@ class StudentController extends Controller
                 'message' => "Kamu memiliki {$tomorrowTasks->count()} agenda untuk esok hari: \"{$tomorrowTasks->first()->title}\"",
             ];
         }
-        // 4. Pengumuman Aktif Terbaru
+
+        // 3. Pengumuman Aktif Terbaru
         $announcement = Announcement::where('is_active', true)->latest()->first();
-        // 5. Acara Sekolah Mendatang
+
+        // 4. Acara Sekolah Mendatang
         $schoolEvents = SchoolEvent::orderBy('event_date', 'asc')->get();
-        return view('students.index', [
+
+        // 5. Gabungkan data kalender dari helper getCalendarData($request)
+        return view('students.index', array_merge($this->getCalendarData($request), [
             'title' => 'Agendaku - Siswa',
-            'calDate' => $calDate,
-            'daysInMonth' => $daysInMonth,
-            'firstDayOfWeek' => $firstDayOfWeek,
-            'calAgendas' => $calAgendas,
             'pendingTasks' => $pendingTasks,
             'alertData' => $alertData,
             'announcement' => $announcement,
             'schoolEvents' => $schoolEvents,
-        ]);
+        ]));
     }
 }
