@@ -157,7 +157,14 @@
                 @if ($dayAgendas->isNotEmpty())
                     <div class="cal-task-list w-full flex flex-col gap-1 overflow-y-auto max-h-[65px] mt-1">
                         @foreach ($dayAgendas as $item)
-                            <div class="cal-task-pill text-[0.65rem] lg:text-[0.7rem] px-1.5 py-0.5 rounded-md font-bold text-left whitespace-nowrap overflow-hidden text-ellipsis w-full border {{ $item->category === 'sekolah' ? 'bg-cat-sekolah-bg text-cat-sekolah border-red-200' : 'bg-cat-pribadi-bg text-cat-pribadi border-emerald-200' }}"
+                            @php
+                                $badgeStyle = match ($item->category) {
+                                    'sekolah' => 'bg-cat-sekolah-bg text-cat-sekolah border-red-200',
+                                    'acara' => 'bg-amber-100 text-amber-800 border-amber-300',
+                                    default => 'bg-cat-pribadi-bg text-cat-pribadi border-emerald-200',
+                                };
+                            @endphp
+                            <div class="cal-task-pill text-[0.65rem] lg:text-[0.7rem] px-1.5 py-0.5 rounded-md font-bold text-left whitespace-nowrap overflow-hidden text-ellipsis w-full border {{ $badgeStyle }}"
                                 title="{{ $item->title }}">
                                 {{ $item->title }}
                             </div>

@@ -11,16 +11,18 @@
         <div id="view-role-panel" class="hidden">
             <h2 class="text-2xl font-extrabold mb-6 tracking-tight">Panel Pengelolaan Guru</h2>
 
+            <!-- 1. Form Buat Pengumuman -->
             <div
                 class="card bg-bg-card border-2 border-text-dark rounded-3xl p-8 shadow-pop-lg mb-8 transition-all duration-200">
                 <div
                     class="card-title text-xl font-extrabold tracking-tight mb-6 flex justify-between items-center flex-wrap gap-3 text-text-dark">
                     Buat Pengumuman Sekolah</div>
-                <form onsubmit="handlePostAnnouncement(event)">
+                <form action="{{ route('announcements.store') }}" method="POST">
+                    @csrf
                     <div class="form-group mb-5">
                         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Pesan
                             Pengumuman</label>
-                        <textarea id="announcement-input" rows="3" placeholder="Tuliskan pengumuman untuk seluruh siswa..." required
+                        <textarea name="content" rows="3" placeholder="Tuliskan pengumuman untuk seluruh siswa..." required
                             class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px"></textarea>
                     </div>
                     <button type="submit"
@@ -29,23 +31,24 @@
                 </form>
             </div>
 
+            <!-- 2. Form Tambah Tugas Massal -->
             <div
                 class="card bg-bg-card border-2 border-text-dark rounded-3xl p-8 shadow-pop-lg mb-8 transition-all duration-200">
                 <div
                     class="card-title text-xl font-extrabold tracking-tight mb-6 flex justify-between items-center flex-wrap gap-3 text-text-dark">
                     Tambah Tugas/Acara Massal ke Siswa & Kalender</div>
-                <form onsubmit="handleGuruAddTask(event)">
+                <form action="{{ route('teachers.tasks.store') }}" method="POST">
+                    @csrf
                     <div class="form-group mb-5">
                         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Judul Tugas
-                            /
-                            Acara</label>
-                        <input type="text" id="guru-task-title" placeholder="Contoh: Ujian Tengah Semester IPA" required
+                            / Acara</label>
+                        <input type="text" name="title" placeholder="Contoh: Ujian Tengah Semester IPA" required
                             class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
                     </div>
                     <div class="form-group mb-5">
                         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Tipe
                             Agenda</label>
-                        <select id="guru-task-type"
+                        <select name="category"
                             class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
                             <option value="sekolah">Tugas Akademik</option>
                             <option value="acara">Acara / Ujian Sekolah</option>
@@ -54,7 +57,7 @@
                     <div class="form-group mb-5">
                         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Tanggal /
                             Deadline</label>
-                        <input type="date" id="guru-task-date" required
+                        <input type="date" name="deadline" required
                             class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
                     </div>
                     <button type="submit"
@@ -63,11 +66,50 @@
                 </form>
             </div>
 
+            <!-- 3. Tabel Kelola Tugas & Acara -->
             <div
                 class="card bg-bg-card border-2 border-text-dark rounded-3xl p-8 shadow-pop-lg mb-8 transition-all duration-200">
                 <div
                     class="card-title text-xl font-extrabold tracking-tight mb-6 flex justify-between items-center flex-wrap gap-3 text-text-dark">
                     Kelola Tugas & Acara Sistem</div>
+                <!-- Banner Pengumuman Sekolah Aktif & Tombol Hapus -->
+                @if (isset($announcement) && $announcement)
+                    <div
+                        class="mb-6 p-5 bg-blue-50 border-2 border-text-dark rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-pop-sm">
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-blue-500 text-white border-2 border-text-dark flex items-center justify-center shrink-0 font-extrabold text-lg shadow-pop-3px">
+                                📢
+                            </div>
+                            <div>
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-blue-900 block">Pengumuman
+                                    Sekolah Sedang Aktif</span>
+                                <p class="text-sm font-bold text-text-dark mt-0.5 leading-relaxed">
+                                    {{ $announcement->content }}</p>
+                                <span class="text-[11px] text-text-muted font-semibold mt-1 inline-block">
+                                    Diterbitkan: {{ $announcement->created_at->diffForHumans() }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Form Hapus Pengumuman -->
+                        <form action="{{ route('announcements.destroy', $announcement->id) }}" method="POST"
+                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengumuman ini? Pengumuman tidak akan lagi muncul di dashboard siswa.');"
+                            class="shrink-0 self-end sm:self-center">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="px-4 py-2.5 bg-red-100 text-red-600 border-2 border-red-300 rounded-xl font-extrabold text-xs cursor-pointer transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-text-dark hover:shadow-pop-sm flex items-center gap-2">
+                                🗑️ Hapus Pengumuman
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <div
+                        class="mb-6 p-4 bg-bg-main border-2 border-dashed border-border-custom rounded-2xl text-xs font-bold text-text-muted flex items-center gap-2">
+                        <span>📢</span> Saat ini belum ada pengumuman sekolah yang aktif.
+                    </div>
+                @endif
                 <div class="table-responsive w-full overflow-x-auto rounded-xl border-2 border-border-custom">
                     <table class="admin-table w-full border-collapse text-left text-sm">
                         <thead>
@@ -93,17 +135,25 @@
                                                 onclick="openEditGuruModal({{ $t->id }}, '{{ addslashes($t->title) }}', '{{ $t->category }}', '{{ \Carbon\Carbon::parse($t->deadline)->format('Y-m-d') }}')">
                                                 Ubah
                                             </button>
-                                            <button
-                                                class="bg-red-100 text-red-600 border-2 border-red-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-text-dark hover:shadow-pop-sm"
-                                                onclick="deleteTask({{ $t->id }})">
-                                                Hapus
-                                            </button>
+
+                                            <!-- Tombol Hapus Menggunakan Form Laravel (DELETE) -->
+                                            <form action="{{ route('tasks.destroy', $t->id) }}" method="POST"
+                                                onsubmit="return confirm('Yakin ingin menghapus tugas/acara ini?');"
+                                                class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="bg-red-100 text-red-600 border-2 border-red-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-text-dark hover:shadow-pop-sm">
+                                                    Hapus
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="5" class="p-8 text-center text-text-muted font-bold">Belum ada tugas atau acara sistem.</td>
+                                    <td colspan="5" class="p-8 text-center text-text-muted font-bold">Belum ada tugas
+                                        atau acara sistem.</td>
                                 </tr>
                             @endif
                         </tbody>
@@ -123,21 +173,22 @@
                         class="text-text-muted hover:text-text-dark text-xl font-bold p-1">✕</button>
                 </div>
 
-                <form onsubmit="handleGuruUpdateTask(event)">
-                    <!-- ID tugas/acara yang diedit -->
-                    <input type="hidden" id="edit-guru-task-id">
+                <!-- Form Edit menggunakan action dinamis via JavaScript -->
+                <form id="form-edit-guru" method="POST">
+                    @csrf
+                    @method('PUT')
 
                     <div class="form-group mb-5">
                         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Judul Tugas
                             / Acara</label>
-                        <input type="text" id="edit-guru-task-title" required
+                        <input type="text" name="title" id="edit-guru-task-title" required
                             class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
                     </div>
 
                     <div class="form-group mb-5">
                         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Tipe
                             Agenda</label>
-                        <select id="edit-guru-task-type"
+                        <select name="category" id="edit-guru-task-type"
                             class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
                             <option value="sekolah">Tugas Akademik</option>
                             <option value="acara">Acara / Ujian Sekolah</option>
@@ -147,7 +198,7 @@
                     <div class="form-group mb-6">
                         <label class="block text-xs font-extrabold mb-2 text-text-dark uppercase tracking-wider">Tanggal /
                             Deadline</label>
-                        <input type="date" id="edit-guru-task-date" required
+                        <input type="date" name="deadline" id="edit-guru-task-date" required
                             class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
                     </div>
 
@@ -169,63 +220,11 @@
 
 @push('scripts')
     <script>
-        async function handlePostAnnouncement(e) {
-            e.preventDefault();
-            const txt = document.getElementById('announcement-input').value;
-            try {
-                const res = await fetch("{{ route('announcements.store') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({ content: txt })
-                });
-
-                if (res.ok) {
-                    alert('Pengumuman telah diperbarui!');
-                    window.location.reload();
-                } else {
-                    const err = await res.json();
-                    alert(err.message || 'Gagal memperbarui pengumuman.');
-                }
-            } catch (error) {
-                alert('Terjadi kesalahan jaringan.');
-            }
-        }
-
-        async function handleGuruAddTask(e) {
-            e.preventDefault();
-            const title = document.getElementById('guru-task-title').value;
-            const category = document.getElementById('guru-task-type').value;
-            const deadline = document.getElementById('guru-task-date').value;
-
-            try {
-                const res = await fetch("{{ route('teachers.tasks.store') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({ title, category, deadline })
-                });
-
-                if (res.ok) {
-                    alert('Tugas / Acara berhasil ditambahkan ke seluruh siswa & kalender!');
-                    window.location.reload();
-                } else {
-                    const err = await res.json();
-                    alert(err.message || 'Gagal menerbitkan tugas/acara.');
-                }
-            } catch (error) {
-                alert('Terjadi kesalahan jaringan.');
-            }
-        }
-
+        // Fungsi JS sekarang murni hanya untuk mengatur Modal Popup saja (Sangat Bersih!)
         function openEditGuruModal(taskId, title = '', category = 'sekolah', deadline = '') {
-            document.getElementById('edit-guru-task-id').value = taskId;
+            // Atur URL action form ke route update Laravel: /tasks/{id}
+            document.getElementById('form-edit-guru').action = `/tasks/${taskId}`;
+
             document.getElementById('edit-guru-task-title').value = title;
             document.getElementById('edit-guru-task-type').value = category;
             document.getElementById('edit-guru-task-date').value = deadline;
@@ -235,37 +234,6 @@
 
         function closeEditGuruModal() {
             document.getElementById('modal-edit-guru').classList.add('hidden');
-        }
-
-        async function handleGuruUpdateTask(e) {
-            e.preventDefault();
-
-            const id = document.getElementById('edit-guru-task-id').value;
-            const title = document.getElementById('edit-guru-task-title').value.trim();
-            const category = document.getElementById('edit-guru-task-type').value;
-            const deadline = document.getElementById('edit-guru-task-date').value;
-
-            try {
-                const res = await fetch(`/tasks/${id}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({ title, category, deadline })
-                });
-
-                if (res.ok) {
-                    alert('Tugas / Acara berhasil diperbarui!');
-                    window.location.reload();
-                } else {
-                    const err = await res.json();
-                    alert(err.message || 'Gagal memperbarui data.');
-                }
-            } catch (error) {
-                alert('Terjadi kesalahan jaringan.');
-            }
         }
     </script>
 @endpush
