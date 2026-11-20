@@ -18,7 +18,7 @@ Route::get('/login', [AuthController::class, 'loginView'])->name('login');
 Route::post('/login', [AuthController::class, 'loginPost'])->name('login-post');
 Route::get('/register', [AuthController::class, 'registerView'])->name('register-view');
 Route::post('/register', [AuthController::class, 'registerPost'])->name('register-post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // 1. Student Routes (Middleware: auth, role:student,admin)
 Route::middleware(['auth', 'role:student,admin'])->group(function () {

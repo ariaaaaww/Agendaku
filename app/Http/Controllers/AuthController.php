@@ -1,4 +1,4 @@
-<?php
+drop<?php
 
 namespace App\Http\Controllers;
 
