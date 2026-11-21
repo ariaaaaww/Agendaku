@@ -278,15 +278,37 @@
 
 @push('scripts')
     <script>
-        function openAddUserModal() {
-            document.getElementById('modal-add-user').classList.remove('hidden');
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+        async function kirimAkun(url, method, payload) {
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken,
+                    "Accept": "application/json"
+                },
+                body: payload ? JSON.stringify(payload) : undefined
+            });
+
+            let body = {};
+            try { body = await res.json(); } catch (e) {}
+
+            if (res.ok) {
+                alert(body.message || 'Berhasil.');
+                window.location.reload();
+                return;
+            }
+
+            let pesan = body.message || 'Terjadi kesalahan (kode ' + res.status + ').';
+            if (body.errors) {
+                pesan = Object.values(body.errors)[0][0];
+            }
+            alert(pesan);
         }
 
-        function closeAddUserModal() {
-            document.getElementById('modal-add-user').classList.add('hidden');
-        }
-
-        /* --- HANDLER TAMBAH AKUN --- */
+        /* --- TAMBAH AKUN --- */
         function openAddUserModal() {
             document.getElementById('modal-add-user').classList.remove('hidden');
         }
@@ -297,42 +319,25 @@
 
         async function handleAdminAddUser(e) {
             e.preventDefault();
-            const fullname = document.getElementById('add-user-fullname').value.trim();
-            const username = document.getElementById('add-user-username').value.trim();
-            const role = document.getElementById('add-user-role').value;
-            const password = document.getElementById('add-user-password').value;
-
             try {
-                const res = await fetch("{{ route('admin.users.store') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({ fullname, username, role, password })
+                await kirimAkun("{{ route('admin.users.store') }}", "POST", {
+                    name:     document.getElementById('add-user-fullname').value.trim(),
+                    username: document.getElementById('add-user-username').value.trim(),
+                    role:     document.getElementById('add-user-role').value,
+                    password: document.getElementById('add-user-password').value
                 });
-
-                if (res.ok) {
-                    alert('Akun baru berhasil ditambahkan ke database!');
-                    window.location.reload();
-                } else {
-                    const err = await res.json();
-                    alert(err.message || 'Gagal menambahkan akun.');
-                }
             } catch (error) {
                 alert('Terjadi kesalahan jaringan.');
             }
         }
 
-        /* --- HANDLER UBAH AKUN --- */
+        /* --- UBAH AKUN --- */
         function openEditUserModal(userId, name = '', username = '', role = 'siswa') {
             document.getElementById('edit-user-id').value = userId;
             document.getElementById('edit-user-fullname').value = name;
             document.getElementById('edit-user-username').value = username;
             document.getElementById('edit-user-role').value = role;
             document.getElementById('edit-user-password').value = '';
-
             document.getElementById('modal-edit-user').classList.remove('hidden');
         }
 
@@ -343,56 +348,25 @@
         async function handleAdminUpdateUser(e) {
             e.preventDefault();
             const id = document.getElementById('edit-user-id').value;
-            const fullname = document.getElementById('edit-user-fullname').value.trim();
-            const username = document.getElementById('edit-user-username').value.trim();
-            const role = document.getElementById('edit-user-role').value;
-            const password = document.getElementById('edit-user-password').value;
-
             try {
-                const res = await fetch(`/admin/users/${id}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({ fullname, username, role, password })
+                await kirimAkun(`/admin/users/${id}`, "PUT", {
+                    name:     document.getElementById('edit-user-fullname').value.trim(),
+                    username: document.getElementById('edit-user-username').value.trim(),
+                    role:     document.getElementById('edit-user-role').value,
+                    password: document.getElementById('edit-user-password').value
                 });
-
-                if (res.ok) {
-                    alert('Data akun berhasil diperbarui di database!');
-                    window.location.reload();
-                } else {
-                    const err = await res.json();
-                    alert(err.message || 'Gagal memperbarui akun.');
-                }
             } catch (error) {
                 alert('Terjadi kesalahan jaringan.');
             }
         }
 
-        /* --- HANDLER HAPUS AKUN --- */
+        /* --- HAPUS AKUN --- */
         async function deleteUserAccount(userId) {
             if (!confirm('Apakah Anda yakin ingin menghapus akun ini? Akun yang dihapus tidak dapat dipulihkan.')) {
                 return;
             }
-
             try {
-                const res = await fetch(`/admin/users/${userId}`, {
-                    method: "DELETE",
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        "Accept": "application/json"
-                    }
-                });
-
-                if (res.ok) {
-                    alert('Akun berhasil dihapus dari database!');
-                    window.location.reload();
-                } else {
-                    const err = await res.json();
-                    alert(err.message || 'Gagal menghapus akun.');
-                }
+                await kirimAkun(`/admin/users/${userId}`, "DELETE");
             } catch (error) {
                 alert('Terjadi kesalahan jaringan.');
             }

@@ -2,12 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\UserController;
+use App\Models\User;
 
-/**
- * Data kosong agar Blade dashboard tidak error sebelum backend dibangun ulang.
- *
- * @return array<string, mixed>
- */
 if (! function_exists('agendakuEmptyDashboard')) {
     function agendakuEmptyDashboard(string $title): array
     {
@@ -33,79 +30,100 @@ if (! function_exists('agendakuEmptyDashboard')) {
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Halaman frontend Agendaku
-|--------------------------------------------------------------------------
-|
-| Controller, autentikasi, dan middleware khusus aplikasi sudah dihapus
-| agar bisa dibangun ulang. Route di bawah hanya menampilkan Blade yang
-| sudah ada. Form POST dan aksi CRUD sengaja tidak diproses.
-|
-*/
+/**
+ * Cek hak akses role. Return null kalau boleh, atau redirect kalau tidak boleh.
+ * Admin selalu boleh. Array kosong = hanya admin.
+ */
+if (! function_exists('agendakuGuard')) {
+    function agendakuGuard(array $roles = [])
+    {
+        $user = auth()->user();
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+        if ($user->role === 'admin' || in_array($user->role, $roles, true)) {
+            return null;
+        }
 
-// Authentication Routes
+        return match ($user->role) {
+            'guru'  => redirect()->route('teachers.index'),
+            'osis'  => redirect()->route('council.index'),
+            default => redirect()->route('students.index'),
+        };
+    }
+}
+
+// ===== Halaman publik (guest boleh) =====
+Route::get('/', fn () => redirect()->route('login'));
+
 Route::get('/login', [AuthController::class, 'loginView'])->name('login');
 Route::post('/login', [AuthController::class, 'loginPost'])->name('login-post');
 Route::get('/register', [AuthController::class, 'registerView'])->name('register-view');
 Route::post('/register', [AuthController::class, 'registerPost'])->name('register-post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-Route::get('/students', function () {
-    return view('students.index', agendakuEmptyDashboard('Agendaku - Siswa'));
-})->name('students.index');
+// ===== Halaman yang butuh login (guest otomatis ke /login) =====
+Route::middleware('auth')->group(function () {
 
-Route::get('/teacher', function () {
-    return view('teachers.index', agendakuEmptyDashboard('Agendaku - Guru'));
-})->name('teachers.index');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/council', function () {
-    return view('council.index', agendakuEmptyDashboard('Agendaku - OSIS'));
-})->name('council.index');
+    Route::get('/students', function () {
+        if ($r = agendakuGuard(['siswa'])) return $r;
+        return view('students.index', agendakuEmptyDashboard('Agendaku - Siswa'));
+    })->name('students.index');
 
-Route::get('/admin', function () {
-    return view('admin.index', agendakuEmptyDashboard('Agendaku - Admin'));
-})->name('admin.index');
+    Route::get('/teacher', function () {
+        if ($r = agendakuGuard(['guru'])) return $r;
+        return view('teachers.index', agendakuEmptyDashboard('Agendaku - Guru'));
+    })->name('teachers.index');
 
-/*
-| Nama route lama dipertahankan agar Blade dan JavaScript tidak error
-| saat memanggil route(). Handler tidak menyimpan data.
-*/
-Route::post('/tasks', fn () => abort(501, 'Penyimpanan tugas belum diimplementasikan.'))->name('tasks.store');
-Route::put('/tasks/{task}', fn () => abort(501, 'Pembaruan tugas belum diimplementasikan.'))->name('tasks.update');
-Route::patch('/tasks/{task}/toggle', fn () => abort(501, 'Toggle tugas belum diimplementasikan.'))->name('tasks.toggle');
-Route::delete('/tasks/{task}', fn () => abort(501, 'Penghapusan tugas belum diimplementasikan.'))->name('tasks.destroy');
-Route::post('/teacher/tasks', fn () => abort(501, 'Penerbitan tugas guru belum diimplementasikan.'))->name('teachers.tasks.store');
-Route::post('/announcements', fn () => abort(501, 'Pengumuman belum diimplementasikan.'))->name('announcements.store');
-Route::post('/school-events', fn () => abort(501, 'Acara sekolah belum diimplementasikan.'))->name('school-events.store');
-Route::put('/school-events/{schoolEvent}', fn () => abort(501, 'Pembaruan acara belum diimplementasikan.'))->name('school-events.update');
-Route::delete('/school-events/{schoolEvent}', fn () => abort(501, 'Penghapusan acara belum diimplementasikan.'))->name('school-events.destroy');
-Route::post('/admin/users', fn () => abort(501, 'Manajemen pengguna belum diimplementasikan.'))->name('admin.users.store');
-Route::put('/admin/users/{user}', fn () => abort(501, 'Pembaruan pengguna belum diimplementasikan.'))->name('admin.users.update');
-Route::delete('/admin/users/{user}', fn () => abort(501, 'Penghapusan pengguna belum diimplementasikan.'))->name('admin.users.destroy');
+    Route::get('/council', function () {
+        if ($r = agendakuGuard(['osis'])) return $r;
+        return view('council.index', agendakuEmptyDashboard('Agendaku - OSIS'));
+    })->name('council.index');
 
-Route::get('/api/calendar/month', function () {
-    $year = (int) request('year', now()->year);
-    $month = (int) request('month', now()->month);
-    $date = now()->setDate($year, $month, 1)->startOfMonth();
+    Route::get('/admin', function () {
+        if ($r = agendakuGuard()) return $r; // hanya admin
 
-    $monthNames = [
-        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-    ];
+        $data = agendakuEmptyDashboard('Agendaku - Admin');
+        $data['allUsers']   = User::latest()->get();
+        $data['totalUsers'] = $data['allUsers']->count();
 
-    return response()->json([
-        'year' => $year,
-        'month' => $month,
-        'month_name' => $monthNames[$month] ?? $date->format('F'),
-        'first_day_of_week' => $date->dayOfWeek,
-        'days_in_month' => $date->daysInMonth,
-        'today_date' => now()->toDateString(),
-        'agendas' => (object) [],
-    ]);
-})->name('calendar.month');
+        return view('admin.index', $data);
+    })->name('admin.index');
+
+    // CRUD pengguna (pengecekan admin ada di dalam controller)
+    Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
+    Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+    Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+
+    // Route lama dipertahankan agar Blade tidak error saat memanggil route()
+    Route::post('/tasks', fn () => abort(501, 'Penyimpanan tugas belum diimplementasikan.'))->name('tasks.store');
+    Route::put('/tasks/{task}', fn () => abort(501, 'Pembaruan tugas belum diimplementasikan.'))->name('tasks.update');
+    Route::patch('/tasks/{task}/toggle', fn () => abort(501, 'Toggle tugas belum diimplementasikan.'))->name('tasks.toggle');
+    Route::delete('/tasks/{task}', fn () => abort(501, 'Penghapusan tugas belum diimplementasikan.'))->name('tasks.destroy');
+    Route::post('/teacher/tasks', fn () => abort(501, 'Penerbitan tugas guru belum diimplementasikan.'))->name('teachers.tasks.store');
+    Route::post('/announcements', fn () => abort(501, 'Pengumuman belum diimplementasikan.'))->name('announcements.store');
+    Route::post('/school-events', fn () => abort(501, 'Acara sekolah belum diimplementasikan.'))->name('school-events.store');
+    Route::put('/school-events/{schoolEvent}', fn () => abort(501, 'Pembaruan acara belum diimplementasikan.'))->name('school-events.update');
+    Route::delete('/school-events/{schoolEvent}', fn () => abort(501, 'Penghapusan acara belum diimplementasikan.'))->name('school-events.destroy');
+
+    Route::get('/api/calendar/month', function () {
+        $year = (int) request('year', now()->year);
+        $month = (int) request('month', now()->month);
+        $date = now()->setDate($year, $month, 1)->startOfMonth();
+
+        $monthNames = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
+        return response()->json([
+            'year' => $year,
+            'month' => $month,
+            'month_name' => $monthNames[$month] ?? $date->format('F'),
+            'first_day_of_week' => $date->dayOfWeek,
+            'days_in_month' => $date->daysInMonth,
+            'today_date' => now()->toDateString(),
+            'agendas' => (object) [],
+        ]);
+    })->name('calendar.month');
+});

@@ -12,6 +12,16 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Admin
+        User::updateOrCreate(
+            ['username' => 'admin'],
+            [
+                'name'     => 'Admin User',
+                'password' => bcrypt('12345678'),
+                'role'     => 'admin',
+            ]
+        );
+
         // Guru
         User::updateOrCreate(
             ['username' => 'budi'],
