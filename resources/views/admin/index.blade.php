@@ -13,15 +13,18 @@
             <div class="stats-grid grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-5 mb-8">
                 <div class="stat-card bg-bg-card border-2 border-text-dark rounded-2xl p-6 shadow-pop-5px">
                     <span class="text-xs text-text-muted font-extrabold uppercase tracking-wider">Total Pengguna</span>
-                    <h3 id="admin-stat-users" class="text-4xl font-extrabold mt-1.5 text-primary-orange tracking-tight">{{ $totalUsers ?? 0 }}</h3>
+                    <h3 id="admin-stat-users" class="text-4xl font-extrabold mt-1.5 text-primary-orange tracking-tight">
+                        {{ $totalUsers ?? 0 }}</h3>
                 </div>
                 <div class="stat-card bg-bg-card border-2 border-text-dark rounded-2xl p-6 shadow-pop-5px">
                     <span class="text-xs text-text-muted font-extrabold uppercase tracking-wider">Total Tugas Selesai</span>
-                    <h3 id="admin-stat-completed" class="text-4xl font-extrabold mt-1.5 text-cat-pribadi tracking-tight">{{ $totalCompletedTasks ?? 0 }}</h3>
+                    <h3 id="admin-stat-completed" class="text-4xl font-extrabold mt-1.5 text-cat-pribadi tracking-tight">
+                        {{ $totalCompletedTasks ?? 0 }}</h3>
                 </div>
                 <div class="stat-card bg-bg-card border-2 border-text-dark rounded-2xl p-6 shadow-pop-5px">
                     <span class="text-xs text-text-muted font-extrabold uppercase tracking-wider">Total Tugas Pending</span>
-                    <h3 id="admin-stat-pending" class="text-4xl font-extrabold mt-1.5 text-prio-tinggi tracking-tight">{{ $totalPendingTasks ?? 0 }}</h3>
+                    <h3 id="admin-stat-pending" class="text-4xl font-extrabold mt-1.5 text-prio-tinggi tracking-tight">
+                        {{ $totalPendingTasks ?? 0 }}</h3>
                 </div>
             </div>
 
@@ -44,7 +47,8 @@
                             @if (isset($studentProgress) && $studentProgress->count() > 0)
                                 @foreach ($studentProgress as $siswa)
                                     <tr class="border-b border-border-custom">
-                                        <td class="p-4.5 font-extrabold">{{ $siswa->name }} ({{ '@'.$siswa->username }})</td>
+                                        <td class="p-4.5 font-extrabold">{{ $siswa->name }} ({{ '@' . $siswa->username }})
+                                        </td>
                                         <td class="p-4.5 font-extrabold text-cat-pribadi">{{ $siswa->completed_count }}</td>
                                         <td class="p-4.5 font-extrabold text-prio-tinggi">{{ $siswa->pending_count }}</td>
                                         <td class="p-4.5 font-bold"><strong>{{ $siswa->total_count }}</strong></td>
@@ -52,7 +56,8 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="4" class="p-6 text-center text-text-muted font-bold">Belum ada data siswa.</td>
+                                    <td colspan="4" class="p-6 text-center text-text-muted font-bold">Belum ada data
+                                        siswa.</td>
                                 </tr>
                             @endif
                         </tbody>
@@ -79,13 +84,15 @@
                                 @foreach ($allEvents as $ev)
                                     <tr class="border-b border-border-custom">
                                         <td class="p-4.5 font-extrabold">{{ $ev->title }}</td>
-                                        <td class="p-4.5">{{ \Carbon\Carbon::parse($ev->event_date)->format('Y-m-d') }}</td>
+                                        <td class="p-4.5">{{ \Carbon\Carbon::parse($ev->event_date)->format('Y-m-d') }}
+                                        </td>
                                         <td class="p-4.5">{{ $ev->organizer->name ?? 'OSIS' }}</td>
                                     </tr>
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="3" class="p-6 text-center text-text-muted font-bold">Belum ada acara sekolah/OSIS.</td>
+                                    <td colspan="3" class="p-6 text-center text-text-muted font-bold">Belum ada acara
+                                        sekolah/OSIS.</td>
                                 </tr>
                             @endif
                         </tbody>
@@ -117,26 +124,32 @@
                         <tbody id="admin-users-manage-table" class="[&_tr:hover_td]:bg-primary-light">
                             @php
                                 $roleBadges = [
-                                    'siswa' => 'bg-primary-light text-primary-orange border-primary-orange/30',
+                                    'student' => 'bg-primary-light text-primary-orange border-primary-orange/30',
                                     'admin' => 'bg-amber-100 text-amber-700 border-amber-500/30',
-                                    'guru' => 'bg-green-100 text-green-700 border-green-600/30',
-                                    'osis' => 'bg-purple-100 text-purple-700 border-purple-600/30',
+                                    'teacher' => 'bg-green-100 text-green-700 border-green-600/30',
+                                    'council' => 'bg-purple-100 text-purple-700 border-purple-600/30',
                                 ];
                             @endphp
+
                             @if (isset($allUsers) && $allUsers->count() > 0)
                                 @foreach ($allUsers as $u)
+                                    @php
+                                        // Mengambil nilai string dari Enum UserRole
+                                        $roleVal = $u->role instanceof \App\Enums\UserRole ? $u->role->value : $u->role;
+                                    @endphp
                                     <tr class="border-b border-border-custom">
                                         <td class="p-4.5 font-extrabold text-text-dark">{{ $u->name }}</td>
-                                        <td class="p-4.5 font-semibold text-text-muted">{{ '@'.$u->username }}</td>
+                                        <td class="p-4.5 font-semibold text-text-muted">{{ '@' . $u->username }}</td>
                                         <td class="p-4.5">
-                                            <span class="inline-block px-2.5 py-0.5 rounded-full text-[0.7rem] font-extrabold uppercase tracking-wider border {{ $roleBadges[$u->role] ?? $roleBadges['siswa'] }}">
-                                                {{ $u->role }}
+                                            <span
+                                                class="inline-block px-2.5 py-0.5 rounded-full text-[0.7rem] font-extrabold uppercase tracking-wider border {{ $roleBadges[$roleVal] ?? $roleBadges['student'] }}">
+                                                {{ $roleVal }}
                                             </span>
                                         </td>
                                         <td class="p-4.5 flex items-center gap-2">
                                             <button
                                                 class="bg-amber-100 text-amber-800 border-2 border-amber-300 rounded-lg px-3 py-1.5 text-xs font-extrabold cursor-pointer transition-all duration-200 hover:bg-amber-400 hover:text-text-dark hover:border-text-dark hover:shadow-pop-sm"
-                                                onclick="openEditUserModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ addslashes($u->username) }}', '{{ $u->role }}')">
+                                                onclick="openEditUserModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ addslashes($u->username) }}', '{{ $roleVal }}')">
                                                 Ubah
                                             </button>
                                             @if (auth()->id() !== $u->id)
@@ -149,6 +162,11 @@
                                         </td>
                                     </tr>
                                 @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="4" class="p-8 text-center text-text-muted font-bold">Belum ada akun
+                                        pengguna.</td>
+                                </tr>
                             @endif
                         </tbody>
                     </table>
@@ -186,10 +204,10 @@
                             Peran</label>
                         <select id="add-user-role"
                             class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
-                            <option value="siswa">Siswa</option>
-                            <option value="guru">Guru</option>
-                            <option value="osis">Pengurus OSIS</option>
-                            <option value="admin">Administrator</option>
+                            <option value="student">Siswa (student)</option>
+                            <option value="teacher">Guru (teacher)</option>
+                            <option value="council">Pengurus OSIS (council)</option>
+                            <option value="admin">Administrator (admin)</option>
                         </select>
                     </div>
 
@@ -246,10 +264,10 @@
                             Peran</label>
                         <select id="edit-user-role"
                             class="w-full px-4 py-3.5 border-2 border-border-custom rounded-xl text-sm font-semibold outline-none transition-all duration-200 bg-bg-main text-text-dark focus:border-text-dark focus:bg-white focus:shadow-pop-3px">
-                            <option value="siswa">Siswa</option>
-                            <option value="guru">Guru</option>
-                            <option value="osis">Pengurus OSIS</option>
-                            <option value="admin">Administrator</option>
+                            <option value="student">Siswa (student)</option>
+                            <option value="teacher">Guru (teacher)</option>
+                            <option value="council">Pengurus OSIS (council)</option>
+                            <option value="admin">Administrator (admin)</option>
                         </select>
                     </div>
 
@@ -307,10 +325,16 @@
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content'),
                         "Accept": "application/json"
                     },
-                    body: JSON.stringify({ fullname, username, role, password })
+                    body: JSON.stringify({
+                        fullname,
+                        username,
+                        role,
+                        password
+                    })
                 });
 
                 if (res.ok) {
@@ -353,10 +377,16 @@
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content'),
                         "Accept": "application/json"
                     },
-                    body: JSON.stringify({ fullname, username, role, password })
+                    body: JSON.stringify({
+                        fullname,
+                        username,
+                        role,
+                        password
+                    })
                 });
 
                 if (res.ok) {
@@ -381,7 +411,8 @@
                 const res = await fetch(`/admin/users/${userId}`, {
                     method: "DELETE",
                     headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content'),
                         "Accept": "application/json"
                     }
                 });

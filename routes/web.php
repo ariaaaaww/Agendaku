@@ -8,6 +8,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\SchoolEventController;
+use App\Http\Controllers\CalendarController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to login
@@ -67,42 +68,13 @@ Route::middleware(['auth', 'role:council,admin'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
 
-    // User Management
+    // User Management CRUD
     Route::prefix('users')->as('users.')->group(function () {
-        Route::post('/', fn() => abort(501, 'Manajemen pengguna belum diimplementasikan.'))->name('store');
-        Route::put('/{user}', fn() => abort(501, 'Pembaruan pengguna belum diimplementasikan.'))->name('update');
-        Route::delete('/{user}', fn() => abort(501, 'Penghapusan pengguna belum diimplementasikan.'))->name('destroy');
+        Route::post('/', [AdminController::class, 'storeUser'])->name('store');
+        Route::put('/{user}', [AdminController::class, 'updateUser'])->name('update');
+        Route::delete('/{user}', [AdminController::class, 'destroyUser'])->name('destroy');
     });
 });
 
 // Calendar API
-Route::get('/api/calendar/month', function () {
-    $year = (int) request('year', now()->year);
-    $month = (int) request('month', now()->month);
-    $date = now()->setDate($year, $month, 1)->startOfMonth();
-
-    $monthNames = [
-        1 => 'Januari',
-        2 => 'Februari',
-        3 => 'Maret',
-        4 => 'April',
-        5 => 'Mei',
-        6 => 'Juni',
-        7 => 'Juli',
-        8 => 'Agustus',
-        9 => 'September',
-        10 => 'Oktober',
-        11 => 'November',
-        12 => 'Desember',
-    ];
-
-    return response()->json([
-        'year' => $year,
-        'month' => $month,
-        'month_name' => $monthNames[$month] ?? $date->format('F'),
-        'first_day_of_week' => $date->dayOfWeek,
-        'days_in_month' => $date->daysInMonth,
-        'today_date' => now()->toDateString(),
-        'agendas' => (object) [],
-    ]);
-})->name('calendar.month');
+Route::get('/api/calendar/month', [CalendarController::class, 'getMonthAgenda'])->name('calendar.month');
