@@ -105,12 +105,12 @@
                 @endif
 
                 {{-- Halaman Siswa --}}
-                @if (!request()->routeIs('students.*') && !request()->is('students*'))
+                {{-- @if (!request()->routeIs('students.*') && !request()->is('students*'))
                     <a href="{{ route('students.index') }}"
                         class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1">
                         <span class="icon-[akar-icons--calendar]"></span> Halaman Siswa
                     </a>
-                @endif
+                @endif --}}
 
                 {{-- 2. ROLE GURU: Hanya melihat Panel Guru --}}
             @elseif ($currentRole === 'teacher' || $currentRole === 'guru')
