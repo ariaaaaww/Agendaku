@@ -34,7 +34,7 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|in:sekolah,acara',
+            'category' => 'required|in:sekolah,pribadi',
             'deadline' => 'required|date',
         ]);
 

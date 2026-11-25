@@ -63,7 +63,6 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $validated['fullname'],
             'username' => $validated['username'],
-            'email' => $validated['username'].'@agendaku.test',
             'password' => $validated['password'],
             'role' => UserRole::STUDENT,
         ]);
