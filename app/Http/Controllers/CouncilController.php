@@ -12,13 +12,13 @@ class CouncilController extends Controller
     {
         $osisEvents = SchoolEvent::orderBy('event_date', 'asc')->get();
 
-        return view('council.index', [
+        return view('council.index', array_merge($this->getCalendarData($request), [
             'title' => 'Agendaku - Panel OSIS',
             'osisEvents' => $osisEvents,
             'schoolEvents' => $osisEvents, // Menampilkan acara OSIS di tab 'Acara Sekolah'
             'announcement' => null,
             'alertData' => ['type' => 'empty', 'count' => 0, 'message' => 'Semuanya terkendali!'],
             'pendingTasks' => collect(),
-        ]);
+        ]));
     }
 }

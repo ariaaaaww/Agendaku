@@ -39,18 +39,10 @@
                 </svg>
             </span> Kalender
         </button>
-        <button onclick="switchTab('tugas')" id="tab-btn-tugas"
-            class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
-            <span class="icon-[ci--list-check]"></span> To-Do List
-        </button>
-        <button onclick="switchTab('acara')" id="tab-btn-acara"
-            class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
-            <span class="icon-[hugeicons--ai-magic]"></span> Acara Sekolah
-        </button>
-        <button onclick="switchTab('tambah')" id="tab-btn-tambah"
-            class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
-            <span class="icon-[akar-icons--plus]"></span> Tambah Agenda
-        </button>
+
+
+
+
         @auth
             @php
                 $currentRole =
@@ -59,6 +51,20 @@
                         : auth()->user()->role ?? 'student';
             @endphp
 
+            @if ($currentRole === 'student')
+                <button onclick="switchTab('acara')" id="tab-btn-acara"
+                    class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
+                    <span class="icon-[hugeicons--ai-magic]"></span> Acara Sekolah
+                </button>
+                <button onclick="switchTab('tugas')" id="tab-btn-tugas"
+                    class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
+                    <span class="icon-[ci--list-check]"></span> To-Do List
+                </button>
+                <button onclick="switchTab('tambah')" id="tab-btn-tambah"
+                    class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1 [&.active]:bg-primary-orange [&.active]:text-white [&.active]:border-text-dark [&.active]:shadow-pop [&.active]:translate-x-1 [&.active]:hover:bg-primary-hover">
+                    <span class="icon-[akar-icons--plus]"></span> Tambah Agenda
+                </button>
+            @endif
             {{-- 1. ROLE ADMIN: Dapat melihat dan mengakses semua panel khusus setiap role --}}
             @if ($currentRole === 'admin')
                 <div class="my-2 border-t-2 border-dashed border-border-custom"></div>
@@ -104,14 +110,6 @@
                     </a>
                 @endif
 
-                {{-- Halaman Siswa --}}
-                {{-- @if (!request()->routeIs('students.*') && !request()->is('students*'))
-                    <a href="{{ route('students.index') }}"
-                        class="nav-tab-btn flex items-center gap-3 p-3.5 border-2 border-transparent bg-transparent rounded-2xl font-bold text-base text-text-muted cursor-pointer transition-all duration-200 text-left w-full hover:bg-bg-main hover:text-text-dark hover:translate-x-1">
-                        <span class="icon-[akar-icons--calendar]"></span> Halaman Siswa
-                    </a>
-                @endif --}}
-
                 {{-- 2. ROLE GURU: Hanya melihat Panel Guru --}}
             @elseif ($currentRole === 'teacher' || $currentRole === 'guru')
                 @if (request()->routeIs('teachers.*') || request()->is('teacher*'))
@@ -139,15 +137,13 @@
                         <span class="icon-[ci--users]"></span> Panel OSIS
                     </a>
                 @endif
-
-                {{-- 4. ROLE SISWA (student/siswa): Tidak menampilkan panel tambahan --}}
             @endif
         @endauth
     </div>
 
     <!-- User Profile Box -->
     <div id="nav-user-info"
-    class="user-profile-nav flex bg-bg-main border-2 border-border-custom rounded-3xl p-4 flex-col gap-3.5 mt-6 shrink-0 max-lg:fixed max-lg:bottom-0 max-lg:-left-full max-lg:w-[280px] max-lg:rounded-none max-lg:border-r-2 max-lg:border-text-dark max-lg:border-t-2 max-lg:border-border-custom max-lg:z-[1000] max-lg:mt-0 transition-[left] duration-300">
+        class="user-profile-nav flex bg-bg-main border-2 border-border-custom rounded-3xl p-4 flex-col gap-3.5 mt-6 shrink-0 max-lg:fixed max-lg:bottom-0 max-lg:-left-full max-lg:w-[280px] max-lg:rounded-none max-lg:border-r-2 max-lg:border-text-dark max-lg:border-t-2 max-lg:border-border-custom max-lg:z-[1000] max-lg:mt-0 transition-[left] duration-300">
         @auth
             @php
                 $roleColors = [
